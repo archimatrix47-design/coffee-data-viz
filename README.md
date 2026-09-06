@@ -203,3 +203,44 @@ npx esbuild web/src/map-libs.js   --bundle --format=iife --minify --outfile=web/
 
 Everything is bundled locally rather than pulled from a CDN, so the site works offline
 and pins its own versions.
+
+## Deploying
+
+Netlify, from this repository. `netlify.toml` carries the build command, publish directory
+and function config, so nothing needs setting in Netlify's UI beyond connecting the repo.
+
+```bash
+npm run build     # web/ -> dist/, minus the local-only pages
+npm start         # local server on :3200, everything enabled
+```
+
+Three things about the deployment are load-bearing:
+
+**The API is one function holding the whole Express app.** `netlify/functions/api.mjs`
+imports it rather than reimplementing it. The import is at module scope so the 12MB parse
+happens once per container: warm requests measure 1-14ms, a cold container about 130ms.
+
+**`dist/` exists so the local-only pages are not deployed.** `NODE_ENV` stops the *server*
+serving the study harness and the traced reference art, but Netlify hands static files to
+the CDN without consulting the server, so a server-side guard cannot reach them. Anything
+local-only has to be added to the EXCLUDE set in `scripts/build-netlify.mjs`, not just to
+`DEV_ONLY_PATHS` in the server.
+
+**API responses are cached at the edge for a week.** Netlify's free tier is a hard cap:
+past 125,000 function invocations the site goes off the air until the 1st of the month, and
+each page load makes three or four API calls. The long TTL is safe because the dataset is
+immutable between deploys and a deploy purges the CDN.
+
+The data refresh runs monthly in GitHub Actions rather than on the host, because Netlify's
+runtime filesystem is read-only and the pipeline needs a 420MB download and several GB of
+heap. It commits `flows.json`, and that commit triggers the deploy.
+
+## Licence
+
+The code is MIT, per `LICENSE`.
+
+The data is not ours to license. It comes from the FAOSTAT Detailed Trade Matrix, published
+by the Food and Agriculture Organization of the United Nations under
+[CC BY-4.0](https://creativecommons.org/licenses/by/4.0/), and `data/processed/` in this
+repository is a filtered and aggregated derivative of it. Attribution to FAO is required
+when reusing it, and the FAO does not endorse this project.

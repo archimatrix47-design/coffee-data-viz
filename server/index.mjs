@@ -47,8 +47,10 @@ function loadData() {
   const metaPath = path.join(PROCESSED, 'meta.json');
   const flowsPath = path.join(PROCESSED, 'flows.json');
   if (!fs.existsSync(metaPath) || !fs.existsSync(flowsPath)) {
-    console.error('No processed data found. Run: npm run refresh');
-    process.exit(1);
+    // Throw rather than exit: when this module is imported by a serverless runtime instead
+    // of run directly, killing the process takes the whole container down and the platform
+    // reports a timeout rather than the actual cause.
+    throw new Error(`No processed data at ${PROCESSED}. Run: npm run refresh`);
   }
   const t0 = Date.now();
   const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
@@ -583,7 +585,19 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: err.message, stack: err.stack?.split('\n').slice(0, 4) });
 });
 
-app.listen(PORT, () => {
+/**
+ * Only bind a port when this file is the program being run.
+ *
+ * Under Netlify the same app is imported by netlify/functions/api.mjs and handed requests by
+ * the runtime, where calling listen() would bind a port nothing is connected to and hold the
+ * container open.
+ */
+const RUN_DIRECTLY = process.argv[1]
+  && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+export { app };
+
+if (RUN_DIRECTLY) app.listen(PORT, () => {
   console.log(`Coffee trade viz -> http://localhost:${PORT}`);
   console.log(`  dev routes and local save: ${DEV_ROUTES ? 'on' : 'off'}`);
   console.log(`  chord   http://localhost:${PORT}/`);

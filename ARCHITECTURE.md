@@ -259,7 +259,39 @@ web/
 data/raw/            coffee_raw.csv + lookup tables + source-manifest.json
 data/processed/      meta.json, flows.json
 exports/             rendered posters
+netlify/functions/
+  api.mjs            wraps the same Express app for Netlify
+scripts/
+  build-netlify.mjs  web/ -> dist/, minus the local-only files
+netlify.toml         redirects, headers, function config
+.github/workflows/
+  refresh-data.yml   monthly FAOSTAT rebuild, commits the result
 ```
+
+### Deployment
+
+Netlify. The static pages go to the CDN from `dist/`; everything under `/api` is one function
+holding the whole Express app.
+
+Two things about that are worth understanding before changing them.
+
+**The cold-start cost is real and deliberate.** The app is fast because 409,785 rows sit in
+memory as typed arrays and a filter change is one linear scan. A function container keeps that
+between invocations, so warm requests behave like the local server, measured at 1-14ms. A cold
+container has to parse 12MB of JSON first, about 120ms locally. The import in `api.mjs` is at
+module scope on purpose: that puts the parse in the container's init phase rather than in the
+first request's handler.
+
+**A server-side guard cannot protect a static file on Netlify.** `DEV_ROUTES` stops the server
+serving the study harness and the reference art, but Netlify hands static files straight to the
+CDN without consulting the server at all. The only thing that keeps them off a public URL is
+`scripts/build-netlify.mjs` not copying them into `dist/`. Adding a new local-only page means
+adding it to that script's EXCLUDE set, not just to `DEV_ONLY_PATHS`.
+
+**The refresh runs in CI, not on the host.** Netlify's runtime filesystem is read-only and the
+pipeline needs a 420MB download and several GB of heap, so it runs monthly in GitHub Actions
+and commits `flows.json`. That commit is what triggers the deploy, so a successful refresh
+publishes itself.
 
 ---
 

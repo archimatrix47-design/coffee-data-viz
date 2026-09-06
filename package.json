@@ -9,11 +9,13 @@
     "dev": "node --watch server/index.mjs",
     "refresh": "node pipeline/refresh.mjs",
     "aggregate": "node pipeline/aggregate.mjs",
-    "start:prod": "NODE_ENV=production node server/index.mjs"
+    "start:prod": "NODE_ENV=production node server/index.mjs",
+    "build": "node scripts/build-netlify.mjs"
   },
   "dependencies": {
     "d3": "^7.9.0",
     "express": "^5.1.0",
+    "serverless-http": "^4.0.0",
     "topojson-client": "^3.1.0",
     "world-atlas": "^2.0.2"
   },

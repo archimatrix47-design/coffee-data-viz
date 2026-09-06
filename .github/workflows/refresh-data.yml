@@ -1,0 +1,65 @@
+# Rebuild the dataset from FAOSTAT and commit the result.
+#
+# This runs in CI rather than on the host on purpose. The pipeline downloads a 420MB archive,
+# streams it through unzip, and needs several GB of heap to aggregate 8.49GB of CSV. None of
+# that fits a free hosting tier, and on Netlify the filesystem is read-only at runtime anyway,
+# so there is nowhere for the result to go.
+#
+# Committing flows.json is what triggers the deploy: Netlify builds on push, so a successful
+# refresh publishes itself. If FAOSTAT has not republished, refresh.mjs sees the same
+# Last-Modified and ETag it recorded last time, exits early, and nothing is committed.
+
+name: Refresh FAOSTAT data
+
+on:
+  schedule:
+    # 04:00 UTC on the 3rd of each month. FAOSTAT publishes irregularly and rarely more than
+    # a few times a year, so monthly is generous; the manifest check makes a no-op run cheap.
+    - cron: '0 4 3 * *'
+  workflow_dispatch:        # so it can be run by hand after a FAOSTAT announcement
+
+permissions:
+  contents: write           # the whole point is to push a commit back
+
+concurrency:
+  group: refresh-data
+  cancel-in-progress: false # never interrupt a half-written dataset
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60      # the download and aggregate together run well under this
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # unzip is present on ubuntu-latest, but the pipeline checks for it and fails with a
+      # clear message rather than a stream error, so confirm it here where the log is obvious.
+      - name: Check unzip is available
+        run: unzip -v | head -1
+
+      - name: Refresh and aggregate
+        run: npm run refresh
+
+      - name: Show what changed
+        run: |
+          git diff --stat -- data/processed data/raw/source-manifest.json || true
+
+      - name: Commit if the data actually moved
+        run: |
+          if git diff --quiet -- data/processed data/raw/source-manifest.json; then
+            echo "FAOSTAT has not republished since the last run. Nothing to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/processed data/raw/source-manifest.json
+          git commit -m "Refresh FAOSTAT data ($(date -u +%Y-%m-%d))"
+          git push

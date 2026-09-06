@@ -14,7 +14,44 @@ import { fileURLToPath } from 'node:url';
 import { ZONES, zoneCodes, zoneLabel, zoneTitleLabel } from '../pipeline/zones.mjs';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const PROCESSED = path.join(ROOT, 'data', 'processed');
+
+/**
+ * Find data/processed, without assuming this file is where it was written.
+ *
+ * A bundler moves it. esbuild inlines this module into the Netlify function and rewrites
+ * nothing about `import.meta.url`, so ROOT ends up relative to the BUNDLE rather than the
+ * repository: the data sits at /var/task/data/processed and a ROOT-relative path looks in
+ * /var/data/processed. Nothing about that fails at build time. The deploy reports success
+ * and then every request 500s, which is a worse failure than not building at all.
+ *
+ * So: try the candidates in order and take the first that is really there. cwd covers the
+ * function runtime, where included_files land relative to the task root.
+ */
+function findProcessed() {
+  const tried = [];
+  const candidates = [
+    process.env.DATA_DIR,
+    path.join(ROOT, 'data', 'processed'),
+    path.join(process.cwd(), 'data', 'processed'),
+    // A bundle nested a level or two under the task root.
+    path.join(ROOT, '..', 'data', 'processed'),
+    path.join(ROOT, '..', '..', 'data', 'processed'),
+  ].filter(Boolean);
+
+  for (const dir of candidates) {
+    const resolved = path.resolve(dir);
+    if (tried.includes(resolved)) continue;
+    tried.push(resolved);
+    if (fs.existsSync(path.join(resolved, 'flows.json'))) return resolved;
+  }
+  throw new Error([
+    'Could not find data/processed/flows.json. Looked in:',
+    ...tried.map((t) => '  ' + t),
+    'Set DATA_DIR, or run: npm run refresh',
+  ].join(String.fromCharCode(10)));
+}
+
+const PROCESSED = findProcessed();
 // 3000 is deliberately avoided: another project's dev server commonly holds it, and
 // a half-bound port (IPv4 here, IPv6 there) produces confusing cross-talk.
 const PORT = process.env.PORT || 3200;

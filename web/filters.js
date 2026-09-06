@@ -45,6 +45,58 @@
     history.replaceState(null, '', s ? location.pathname + '?' + s : location.pathname);
   };
 
+
+  // ------------------------------------------------------------------ fetching
+
+  /**
+   * Fetch JSON and fail with what the server actually said.
+   *
+   * The server's error handler already returns { error, stack } precisely so a bad query can
+   * be told apart from a broken server. Every caller here used to discard it: the data
+   * fetches threw a bare `API 500`, and the /api/meta calls in each page's boot did not check
+   * the status at all, so an error body was parsed as if it were meta and the first field
+   * access threw "Cannot read properties of undefined (reading 'map')". That is the message a
+   * deploy failure produced, and it names neither the endpoint nor the cause.
+   *
+   * A 200 carrying the wrong shape has to fail here too, not three lines later somewhere
+   * that has no idea a request was involved.
+   */
+  window.fetchJSON = async function (url, expect) {
+    let res, text;
+    try {
+      res = await fetch(url);
+      text = await res.text();
+    } catch (e) {
+      throw new Error(`${url} could not be reached: ${e.message}`);
+    }
+
+    let body = null;
+    try { body = JSON.parse(text); } catch { /* handled below */ }
+
+    if (!res.ok) {
+      // A stack means the server broke; no stack means the query was rejected. Worth
+      // separating, because only one of them is the reader's fault.
+      const NL = String.fromCharCode(10);
+      if (body && body.stack) console.error(`${url} -> ${res.status}` + NL + body.stack.join(NL));
+      else console.error(`${url} -> ${res.status}`, body ?? text.slice(0, 500));
+      throw new Error(body?.error || `${url} returned ${res.status}`);
+    }
+
+    if (body === null) {
+      console.error(`${url} returned 200 but not JSON:`, text.slice(0, 500));
+      throw new Error(`${url} returned ${res.status} but the body was not JSON`);
+    }
+
+    // Guards against a 200 whose body is an error object, which is what a function that
+    // failed at import looks like from the browser.
+    if (expect && !(expect in body)) {
+      console.error(`${url} returned 200 without "${expect}":`, body);
+      throw new Error(body.error || body.errorMessage
+        || `${url} returned 200 but no "${expect}" field`);
+    }
+    return body;
+  };
+
   // ------------------------------------------------------------------ chips
 
   /**

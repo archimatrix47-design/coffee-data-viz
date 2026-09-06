@@ -55,9 +55,7 @@ async function load() {
     rule: state.rule, expZone: state.expZone, impZone: state.impZone,
     topSources: state.topSources, maxImporters: 36,
   });
-  const res = await fetch('/api/breakdown?' + p);
-  if (!res.ok) throw new Error('API ' + res.status);
-  state.data = await res.json();
+  state.data = await window.fetchJSON('/api/breakdown?' + p, 'importers');
   refreshTimeline();
   document.getElementById('loading').style.display = 'none';
   render();
@@ -411,7 +409,7 @@ function reloadFromRange() {
 (async function boot() {
   // A shared link decides the view before anything is drawn.
   Object.assign(state, window.readUrlState(DEFAULTS));
-  state.meta = await (await fetch('/api/meta')).json();
+  state.meta = await window.fetchJSON('/api/meta', 'items');
   const years = state.meta.years, last = years[years.length - 1];
 
   const sel = document.getElementById('item');

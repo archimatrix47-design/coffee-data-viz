@@ -84,9 +84,7 @@ const ENDPOINT = {
 };
 
 async function load() {
-  const res = await fetch(ENDPOINT[S.design]());
-  if (!res.ok) throw new Error('API ' + res.status);
-  S.data = await res.json();
+  S.data = await window.fetchJSON(ENDPOINT[S.design](), S.design === 'breakdown' ? 'importers' : 'nodes');
 
   if (S.design === 'map' && !S.world) {
     const topo = await (await fetch('/vendor/countries-110m.json')).json();
@@ -825,7 +823,7 @@ function syncControls() {
 }
 
 (async function boot() {
-  S.meta = await (await fetch('/api/meta')).json();
+  S.meta = await window.fetchJSON('/api/meta', 'items');
   const years = S.meta.years;
 
   document.getElementById('item').innerHTML =

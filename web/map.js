@@ -114,9 +114,7 @@ async function load() {
     rule: state.rule, expZone: state.expZone, impZone: state.impZone,
     minFlow: FLOW_STEPS[state.minFlowIdx], topEdges: Math.max(state.topEdges, 50),
   });
-  const res = await fetch('/api/network?' + p);
-  if (!res.ok) throw new Error('API ' + res.status);
-  state.data = await res.json();
+  state.data = await window.fetchJSON('/api/network?' + p, 'nodes');
   refreshTimeline();
   state.fitPending = true;   // new selection -> reframe
   chooseScale();
@@ -861,7 +859,7 @@ function reloadFromRange() {
 (async function boot() {
   // A shared link decides the view before anything is drawn.
   Object.assign(state, window.readUrlState(DEFAULTS));
-  state.meta = await (await fetch('/api/meta')).json();
+  state.meta = await window.fetchJSON('/api/meta', 'items');
   await loadWorld();
   const years = state.meta.years;
 

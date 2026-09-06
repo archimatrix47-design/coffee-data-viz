@@ -90,9 +90,7 @@ async function load() {
     rule: state.rule, other: state.other ? '1' : '0', bipartite: '1',
     expZone: state.expZone, impZone: state.impZone,
   });
-  const res = await fetch('/api/chord?' + p);
-  if (!res.ok) throw new Error('API ' + res.status);
-  state.data = await res.json();
+  state.data = await window.fetchJSON('/api/chord?' + p, 'nodes');
   refreshTimeline();
   document.getElementById('loading').style.display = 'none';
   chooseScale();
@@ -515,7 +513,7 @@ function reloadFromRange() {
 (async function boot() {
   // A shared link decides the view before anything is drawn.
   Object.assign(state, window.readUrlState(DEFAULTS));
-  state.meta = await (await fetch('/api/meta')).json();
+  state.meta = await window.fetchJSON('/api/meta', 'items');
   const years = state.meta.years;
 
   const sel = document.getElementById('item');

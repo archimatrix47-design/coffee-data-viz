@@ -1,0 +1,6 @@
+node_modules
+data/raw
+exports
+web/vendor/reference-dial.svg
+.git
+*.log

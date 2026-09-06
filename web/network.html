@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Global Coffee Trade · Map</title>
+<link rel="stylesheet" href="/shared.css">
+<script src="/theme.js"></script>
+<style>
+  .shell { display: grid; grid-template-columns: minmax(0,1fr) 300px; height: calc(100vh - 152px); }
+  @media (max-width: 1000px) { .shell { grid-template-columns: 1fr; height: auto; } }
+
+  .map-area { position: relative; background: var(--surface-1); border-top: 1px solid var(--border); overflow: hidden; }
+  #map { display: block; width: 100%; height: 100%; }
+  @media (max-width: 1000px) { .map-area { height: 68vh; } }
+
+  .land { fill: var(--gridline); stroke: var(--surface-1); stroke-width: .4; }
+  .graticule { fill: none; stroke: var(--gridline); stroke-width: .4; opacity: .55; }
+  .sphere { fill: none; stroke: var(--baseline); stroke-width: .6; }
+  .flow { fill: none; mix-blend-mode: multiply; }
+  @media (prefers-color-scheme: dark) { :root:where(:not([data-theme=light])) .flow { mix-blend-mode: screen; } }
+  :root[data-theme=dark] .flow { mix-blend-mode: screen; }
+  .cnode { cursor: pointer; }
+  .cnode-label {
+    font-size: 10px; fill: var(--text-primary); pointer-events: none;
+    paint-order: stroke; stroke: var(--surface-1); stroke-width: 2.6px; stroke-linejoin: round;
+  }
+
+  .float { position: absolute; z-index: 5; display: flex; flex-direction: column; gap: 6px; left: 12px; top: 12px; }
+  .float button {
+    width: 30px; height: 30px; border-radius: 7px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary);
+    font-size: 15px; line-height: 1; box-shadow: var(--shadow);
+  }
+  .counter {
+    position: absolute; right: 12px; top: 12px; z-index: 5;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 11px; font-size: 12.5px; color: var(--text-secondary);
+    box-shadow: var(--shadow); font-variant-numeric: tabular-nums;
+  }
+  .counter b { color: var(--text-primary); font-weight: 650; }
+  .runstate {
+    position: absolute; left: 12px; bottom: 12px; z-index: 5; font-size: 12px; color: var(--ink-2);
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 7px; padding: 5px 10px;
+  }
+
+  .panel { border-left: 1px solid var(--border); background: var(--surface-1); overflow-y: auto; }
+  .panel details { border-bottom: 1px solid var(--border); }
+  .panel summary {
+    cursor: pointer; list-style: none; padding: 10px 14px;
+    font-size: 11px; font-weight: 650; letter-spacing: .05em; text-transform: uppercase;
+    color: var(--text-secondary); display: flex; align-items: center; gap: 7px;
+  }
+  .panel summary::-webkit-details-marker { display: none; }
+  .panel summary::before { content: "+"; color: var(--ink-2); font-size: 13px; width: 9px; }
+  .panel details[open] > summary::before { content: "−"; }
+  .panel details[open] > summary { color: var(--text-primary); }
+  .panel .body { padding: 2px 14px 14px; }
+  .panel .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 4px 0; font-size: 12.5px; }
+  .panel .row .k { color: var(--text-secondary); }
+  .panel .row .v { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .panel input[type=range] { width: 100%; accent-color: var(--accent); }
+  .panel select { width: 100%; font-family: var(--font); font-size: 12.5px; padding: 5px 7px;
+    border-radius: 6px; border: 1px solid var(--baseline); background: var(--surface-1); color: var(--text-primary); }
+  .panel .hint { font-size: 11.5px; color: var(--ink-2); margin: 6px 0 0; line-height: 1.45; }
+  .panel .chk { padding: 3px 0; font-size: 12.5px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+  .rank { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; padding: 3px 0; border-bottom: 1px solid var(--gridline); }
+  .rank .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rank .s { font-variant-numeric: tabular-nums; color: var(--text-secondary); flex: none; }
+  .searchbox { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  .searchbox input { width: 100%; }
+  .scalekey { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <h1>Global Coffee Trade</h1>
+  <span class="sub">Flow map · FAOSTAT 1986–2024</span>
+  <nav class="pages">
+    <a href="/">Flows</a>
+    <a href="/network" aria-current="page">Map</a>
+    <a href="/breakdown">Breakdown</a>
+    <a href="/poster">Poster</a>
+  </nav>
+  <button class="theme-toggle" id="themeToggle" type="button"></button>
+</header>
+
+<div class="controls">
+  <div class="cgroup">
+    <div class="ctl">
+      <label for="item">Product</label>
+      <select id="item"></select>
+    </div>
+    <div class="ctl">
+      <span class="ctl-label">Measure</span>
+      <div class="seg" id="metric">
+        <button data-v="qty" aria-pressed="true">Quantity</button>
+        <button data-v="value" aria-pressed="false">Value</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cgroup">
+    <div class="ctl">
+      <label for="expZone">Sellers from</label>
+      <select id="expZone"></select>
+    </div>
+    <div class="ctl">
+      <label for="impZone">Buyers in</label>
+      <select id="impZone"></select>
+    </div>
+  </div>
+
+  <div class="cgroup tr-group">
+    <div id="timeRange"></div>
+  </div>
+
+  <div class="cgroup">
+    <div class="ctl">
+      <label for="scale">Strand scale</label>
+      <select id="scale"><option value="auto">Auto</option></select>
+    </div>
+    <div class="ctl">
+      <label for="rule">Reported by</label>
+      <select id="rule">
+        <option value="importer">Importer (preferred)</option>
+        <option value="exporter">Exporter</option>
+        <option value="max">Higher of the two</option>
+        <option value="mean">Mean of the two</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="cgroup">
+    <div class="ctl">
+      <span class="ctl-label">Options</span>
+      <label class="chk"><input type="checkbox" id="showTable"> Table</label>
+    </div>
+    <div class="ctl">
+      <span class="ctl-label">&nbsp;</span>
+      <button class="btn-accent" id="toPoster" title="Open these filters in the poster exporter">Make poster →</button>
+    </div>
+  </div>
+</div>
+
+<div class="shell">
+  <div class="chips" id="chips" hidden></div>
+  <div class="map-area">
+    <svg id="map" role="img" aria-label="World map of coffee trade routes"></svg>
+    <div class="float">
+      <button id="zIn" title="Zoom in">+</button>
+      <button id="zOut" title="Zoom out">−</button>
+      <button id="zFit" title="Whole world">⤢</button>
+      <button id="zFitData" title="Fit to selection">⊹</button>
+    </div>
+    <div class="counter"><b id="cStrands">0</b> strands · <span id="cFlows">0</span> routes</div>
+    <div class="runstate" id="runstate">loading…</div>
+  </div>
+
+  <aside class="panel">
+    <div class="searchbox">
+      <input type="search" id="search" placeholder="Search country…" aria-label="Search country">
+    </div>
+
+    <details open>
+      <summary>Scale</summary>
+      <div class="body">
+        <div class="scalekey"><svg id="scaleSwatch" aria-hidden="true" width="110" height="22"></svg><span id="scaleKey"></span></div>
+        <p class="hint" id="scaleNote"></p>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Legend</summary>
+      <div class="body">
+        <div class="legend"><span>Origin</span><span class="ramp"></span><span>Market</span></div>
+        <p class="hint">Circle colour is the share of imports in everything a country handles; circle size is the volume it moves.</p>
+        <p class="hint">Click a country and every partner it trades with turns into a small ring showing how much of <em>that partner</em> the selection accounts for. Select an exporter and each buyer fills in by the share of its own intake that came from the selection; select a buyer and each origin fills in by the share of its own shipments that go there. Each ring keeps its own country’s colour from the ramp above, at full strength for the share and ghosted for the rest, and ring size still means volume moved, so the new reading is the angle alone.</p>
+        <p class="hint">This is not the same ranking as the flows. Brazil’s largest route by tonnage is Germany at 42%, but its largest by dependence is Argentina at 90%, and a line on a map can only ever show the first of those.</p>
+        <p class="hint">The selected country itself opens into a ring of where its own coffee came from, one wedge per origin. A country with no recorded intake gets no ring of its own; the flows already show where it ships.</p>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Connections</summary>
+      <div class="body">
+        <div class="row"><span class="k">Minimum flow</span><span class="v" id="minFlowVal">100 t</span></div>
+        <input type="range" id="minFlow" min="0" max="20" value="6" step="1" aria-label="Minimum flow to draw">
+        <div class="row"><span class="k">Routes drawn</span><span class="v" id="topEdgesVal">400</span></div>
+        <input type="range" id="topEdges" min="25" max="2000" value="400" step="25" aria-label="Number of routes drawn">
+        <p class="hint">Small shipments are where the two reporting countries disagree most, so raising the floor filters noise as well as clutter.</p>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Map</summary>
+      <div class="body">
+        <label class="k" style="font-size:12.5px">Projection</label>
+        <select id="projection" aria-label="Map projection">
+          <option value="naturalEarth1">Natural Earth</option>
+          <option value="equirectangular">Equirectangular</option>
+          <option value="mercator">Mercator</option>
+          <option value="orthographic">Globe</option>
+        </select>
+        <label class="chk" style="margin-top:8px"><input type="checkbox" id="directOnly"> Growers only (hide re-exports)</label>
+        <label class="chk"><input type="checkbox" id="simpleLines"> Simplify lines</label>
+        <p class="hint" style="margin-bottom:8px">Re-export routes are shipments leaving a country that grows little or none of it -
+           Germany to Poland, Belgium to France. Hiding them leaves only coffee moving from where it was grown.
+           Simplifying draws one weighted line per route instead of a countable bundle.</p>
+        <label class="chk"><input type="checkbox" id="showLabels" checked> Country labels</label>
+        <label class="chk"><input type="checkbox" id="showNodes" checked> Country circles</label>
+        <label class="chk"><input type="checkbox" id="curved" checked> Curved routes</label>
+      </div>
+    </details>
+
+    <details open id="chainBox">
+      <summary>Re-export chain</summary>
+      <div class="body">
+        <label class="chk"><input type="checkbox" id="traceOn"> Trace second leg</label>
+        <p class="hint" style="margin-top:4px">Select a growing country, then follow its coffee onward: Brazil → Germany is
+           shipped, Germany → United Kingdom is what Germany sends on.</p>
+        <div id="chainSummary" style="margin-top:8px"></div>
+        <div id="chainList" style="margin-top:6px"></div>
+        <p class="hint" id="chainCaveat" style="display:none">
+          <strong>Estimated.</strong> Coffee is fungible, so no record follows a bean through a warehouse.
+          The second leg is apportioned by the origin's share of that hub's imports.
+        </p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Top routes</summary>
+      <div class="body"><div id="topRoutes"></div></div>
+    </details>
+
+    <details id="selBox">
+      <summary>Selection</summary>
+      <div class="body" id="selBody"><p class="hint" style="margin-top:0">Click a country on the map.</p></div>
+    </details>
+
+    <details>
+      <summary>This view</summary>
+      <div class="body"><div id="stats"></div></div>
+    </details>
+  </aside>
+</div>
+
+<div class="table-panel" id="tableView">
+  <p class="eyebrow" style="padding-top:var(--s-7)">Routes drawn</p>
+  <div class="table-wrap"><table class="data" id="flowTable"></table></div>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script src="/vendor/d3.min.js"></script>
+<script src="/vendor/map-libs.js"></script>
+<script src="/names.js"></script>
+<script src="/filters.js"></script>
+<script src="/motion.js"></script>
+<script src="/colour.js"></script>
+<script src="/timerange.js"></script>
+<script src="/map.js"></script>
+</body>
+</html>

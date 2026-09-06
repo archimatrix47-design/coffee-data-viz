@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Global Coffee Trade · Poster</title>
+<link rel="stylesheet" href="/shared.css">
+<script src="/theme.js"></script>
+<style>
+  .shell { display: grid; grid-template-columns: minmax(0,1fr) 320px; height: calc(100vh - 58px); }
+  @media (max-width: 1000px) { .shell { grid-template-columns: 1fr; height: auto; } }
+
+  .stagewrap {
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px; overflow: auto; background: var(--plane);
+  }
+  #preview {
+    box-shadow: 0 4px 30px rgba(0,0,0,.28); border-radius: 2px;
+    max-width: 100%; max-height: calc(100vh - 110px);
+  }
+
+  .panel { border-left: 1px solid var(--border); background: var(--surface-1); overflow-y: auto; padding-bottom: 30px; }
+  .panel section { padding: 14px; border-bottom: 1px solid var(--border); }
+  .panel h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-2); margin: 0 0 9px; font-weight: 650; }
+  .panel label.f { display: block; font-size: 12px; color: var(--text-secondary); margin: 9px 0 3px; }
+  .panel input[type=text], .panel select, .panel textarea {
+    width: 100%; font-family: var(--font); font-size: 12.5px; padding: 6px 8px;
+    border-radius: 6px; border: 1px solid var(--baseline);
+    background: var(--surface-1); color: var(--text-primary);
+  }
+  .panel textarea { resize: vertical; min-height: 46px; line-height: 1.4; }
+  .panel input[type=range] { width: 100%; accent-color: var(--accent); }
+  .panel .row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 3px 0; }
+  .panel .row .v { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .panel .hint { font-size: 11.5px; color: var(--ink-2); line-height: 1.45; margin: 7px 0 0; }
+
+  .fmtgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .fmtgrid button, .btn {
+    font-family: var(--font); font-size: 12.5px; padding: 7px 8px; cursor: pointer;
+    border-radius: 7px; border: 1px solid var(--baseline);
+    background: var(--surface-1); color: var(--text-secondary);
+  }
+  .fmtgrid button[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+  .btn.primary {
+    width: 100%; background: var(--accent); border-color: var(--accent);
+    color: var(--on-accent); font-weight: 650; font-size: 13px; padding: 10px;
+  }
+  .btn.primary:disabled { opacity: .6; cursor: default; }
+  .btn.ghost { width: 100%; margin-top: 6px; }
+  .status { font-size: 12px; color: var(--ink-2); margin-top: 8px; text-align: center; min-height: 16px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <h1>Global Coffee Trade</h1>
+  <span class="sub">Poster export</span>
+  <nav class="pages">
+    <a href="/">Flows</a>
+    <a href="/network">Map</a>
+    <a href="/breakdown">Breakdown</a>
+    <a href="/poster" aria-current="page">Poster</a>
+  </nav>
+  <button class="theme-toggle" id="themeToggle" type="button"></button>
+</header>
+
+<div class="shell">
+  <div class="stagewrap"><div id="preview"></div></div>
+
+  <aside class="panel">
+    <section>
+      <h2>Visualisation</h2>
+      <select id="design">
+        <option value="flows">Flows, bipartite chord</option>
+        <option value="map">Map, world flow map</option>
+        <option value="breakdown">Breakdown, one dial per buyer</option>
+      </select>
+    </section>
+
+    <section>
+      <h2>Format</h2>
+      <div class="fmtgrid" id="format">
+        <button data-w="1080" data-h="1350" aria-pressed="true">Portrait 4:5</button>
+        <button data-w="1080" data-h="1080" aria-pressed="false">Square 1:1</button>
+        <button data-w="1080" data-h="1920" aria-pressed="false">Story 9:16</button>
+        <button data-w="1080" data-h="566" aria-pressed="false">Landscape</button>
+      </div>
+      <label class="f" for="theme">Theme</label>
+      <select id="theme">
+        <option value="auto">Follow app (light / dark)</option>
+        <option value="espresso">Espresso</option>
+        <option value="latte">Latte</option>
+        <option value="ink">Ink (black)</option>
+        <option value="paper">Paper (cream)</option>
+        <option value="slate">Slate (grey)</option>
+      </select>
+      <label class="f" for="typeface">Typeface</label>
+      <select id="typeface">
+        <option value="mono">Monospace</option>
+        <option value="sans">Sans</option>
+      </select>
+    </section>
+
+    <section>
+      <h2>Data</h2>
+      <label class="f" for="item">Coffee product</label>
+      <select id="item"></select>
+      <label class="f" for="metric" data-only="flows map">Measure</label>
+      <select id="metric" data-only="flows map">
+        <option value="qty">Quantity (tonnes)</option>
+        <option value="value">Value (US$)</option>
+      </select>
+      <label class="f" for="expZone">Sellers from</label>
+      <select id="expZone"></select>
+      <label class="f" for="impZone">Buyers in</label>
+      <select id="impZone"></select>
+      <div class="row" style="margin-top:9px"><span>Year</span><span class="v" id="yearVal">2024</span></div>
+      <input type="range" id="year" min="1986" max="2024" value="2024" step="1">
+      <div class="row"><span>Span</span><span class="v" id="spanVal">single year</span></div>
+      <input type="range" id="span" min="1" max="20" value="1" step="1">
+      <div class="row" data-only="flows breakdown"><span id="topNLabel">Countries per side</span><span class="v" id="topNVal">12</span></div>
+      <input type="range" id="topN" min="4" max="24" value="12" step="1" data-only="flows breakdown">
+      <label class="f" for="rule">Reported by</label>
+      <select id="rule">
+        <option value="importer">Importer (preferred)</option>
+        <option value="exporter">Exporter</option>
+        <option value="max">Higher of the two</option>
+        <option value="mean">Mean of the two</option>
+      </select>
+      <label class="f" style="margin-top:11px" data-only="flows">
+        <input type="checkbox" id="showOther" checked> Group the rest into "Other"
+      </label>
+      <label class="f" for="scale" data-only="flows map">Strand scale</label>
+      <select id="scale" data-only="flows map"><option value="auto">Auto</option></select>
+    </section>
+
+    <section>
+      <h2>Text</h2>
+      <label class="f" for="title">Title</label>
+      <textarea id="title" rows="2"></textarea>
+      <label class="f" for="subtitle">Subtitle</label>
+      <input type="text" id="subtitle">
+      <label class="f" for="credit">Credit</label>
+      <input type="text" id="credit" value="Source: FAOSTAT detailed trade matrix">
+    </section>
+
+    <section>
+      <h2>Export</h2>
+      <label class="f" for="res">Resolution</label>
+      <select id="res">
+        <option value="1">1×, 1080 px wide</option>
+        <option value="2" selected>2×, 2160 px wide</option>
+        <option value="3">3×, 3240 px wide</option>
+        <option value="4">4×, 4320 px wide</option>
+      </select>
+      <p class="hint" id="pxHint"></p>
+      <button class="btn primary" id="download" style="margin-top:10px">Download PNG</button>
+      <button class="btn ghost" id="downloadSvg">Download SVG (vector)</button>
+      <div class="status" id="status"></div>
+    </section>
+  </aside>
+</div>
+
+<script src="/vendor/d3.min.js"></script>
+<script src="/vendor/map-libs.js"></script>
+<script src="/names.js"></script>
+<script src="/colour.js"></script>
+<script src="/funnel.js"></script>
+<script src="/dialcell.js"></script>
+<script src="/motion.js"></script>
+<script src="/poster.js"></script>
+</body>
+</html>

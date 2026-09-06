@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dial study</title>
+<link rel="stylesheet" href="/shared.css">
+<script src="/theme.js"></script>
+<style>
+  .wrap { max-width: 1240px; margin: 0 auto; padding: var(--s-9) var(--gutter) var(--s-12); }
+  h2 { font-size: var(--t-h2); margin: 0 0 var(--s-3); }
+  .lede { font-size: var(--t-body); color: var(--ink-2); max-width: 62ch; line-height: 1.65; margin: 0 0 var(--s-8); }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-8); align-items: start; }
+  @media (max-width: 900px) { .pair { grid-template-columns: 1fr; } }
+  .panel { background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--e-1); padding: var(--s-7); }
+  .panel h3 { font-size: var(--t-caption); text-transform: uppercase; letter-spacing: .08em;
+              color: var(--ink-2); margin: 0 0 var(--s-5); font-weight: 600; }
+  .panel svg, .panel img { display: block; width: 100%; height: auto; }
+  .panel img { filter: grayscale(1); border-radius: var(--r-sm); }
+  .ctlrow { display: flex; gap: var(--s-7); align-items: flex-end; flex-wrap: wrap; margin: var(--s-8) 0; }
+  .measure { margin-top: var(--s-8); font-size: var(--t-caption); color: var(--ink-2); line-height: 1.7; }
+  .measure table { border-collapse: collapse; margin-top: var(--s-4); }
+  .measure td { padding: 2px var(--s-6) 2px 0; }
+  .measure td:first-child { color: var(--ink); }
+  .measure code { font-size: .95em; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <h1>Global Coffee Trade</h1>
+  <span class="sub">Dial study, one cell, drawn large</span>
+  <nav class="pages">
+    <a href="/">Flows</a><a href="/network">Map</a>
+    <a href="/breakdown">Breakdown</a><a href="/poster">Poster</a>
+  </nav>
+  <button class="theme-toggle" id="themeToggle" type="button"></button>
+</header>
+
+<div class="wrap">
+  <h2 class="display">One dial, drawn large</h2>
+  <p class="lede">
+    This page renders a single cell through <code>funnel.js</code> and <code>dialcell.js</code>,
+    the same two modules the breakdown grid and the poster call. Nothing is drawn separately
+    here, so whatever this page shows is what the other two will show at their own sizes.
+    Get this one right and the rest follow.
+  </p>
+  <p class="lede">
+    Radius does not change the arc, and should not: it is a size channel, carrying the
+    buyer's volume in the grid, and if it moved the angle as well then no two dials would
+    have comparable shapes. The angle is the <b>arc opening</b> slider, which is the line's
+    offset from the centre stated in degrees. Everything except the type is a fraction of R,
+    so radius and label size are held apart too; tied together, the radius slider is a zoom
+    and nothing changes shape.
+  </p>
+
+  <div class="ctlrow">
+    <div class="ctl">
+      <label for="buyer">Buyer</label>
+      <select id="buyer"></select>
+    </div>
+    <div class="ctl">
+      <label for="rings">Origins shown <span class="val" id="ringsVal">9</span></label>
+      <input type="range" id="rings" min="3" max="14" value="9" step="1">
+    </div>
+    <div class="ctl">
+      <label for="scale">Disc radius <span class="val" id="scaleVal">180</span></label>
+      <input type="range" id="scale" min="60" max="230" value="180" step="5">
+    </div>
+    <div class="ctl">
+      <label for="label">Label size <span class="val" id="labelVal">22</span></label>
+      <input type="range" id="label" min="9" max="40" value="22" step="1">
+    </div>
+    <div class="ctl">
+      <label for="sweep">Arc opening <span class="val" id="sweepVal">219°</span></label>
+      <input type="range" id="sweep" min="150" max="330" value="219" step="1">
+    </div>
+  </div>
+
+  <div class="pair">
+    <div class="panel">
+      <h3>Drawn here, from the shared modules</h3>
+      <svg id="dial" viewBox="0 0 760 560" role="img" aria-label="One buyer's dial"></svg>
+    </div>
+    <div class="panel">
+      <h3>The reference it has to match</h3>
+      <img src="/vendor/reference-dial.svg" alt="The reference dial">
+    </div>
+  </div>
+
+  <div class="panel" id="overlayPanel" style="margin-top: var(--s-8)">
+    <h3>The two on top of each other</h3>
+    <p class="lede" style="margin-bottom: var(--s-6)">
+      Side by side hides small errors in the arc sweep, because the eye cannot hold an
+      angle across a gap. Stacked, a wrong sweep is obvious. Line the reference up with
+      the sliders once, then read the mismatch directly.
+    </p>
+    <div class="ctlrow" style="margin-top:0">
+      <div class="ctl"><label for="oScale">Reference scale <span class="val" id="oScaleVal">100</span></label>
+        <input type="range" id="oScale" min="40" max="220" value="100" step="1"></div>
+      <div class="ctl"><label for="oX">Reference x <span class="val" id="oXVal">0</span></label>
+        <input type="range" id="oX" min="-400" max="400" value="0" step="2"></div>
+      <div class="ctl"><label for="oY">Reference y <span class="val" id="oYVal">0</span></label>
+        <input type="range" id="oY" min="-400" max="400" value="0" step="2"></div>
+      <div class="ctl"><label for="oFade">Blend <span class="val" id="oFadeVal">55</span></label>
+        <input type="range" id="oFade" min="0" max="100" value="55" step="1"></div>
+    </div>
+    <div id="overlay" style="position:relative; width:100%; aspect-ratio: 760/560; overflow:hidden; background: var(--surface-2, #fff)">
+      <img id="oImg" src="/vendor/reference-dial.svg" alt=""
+           style="position:absolute; left:0; top:0; transform-origin: 0 0; filter: grayscale(1)">
+      <svg id="oDial" viewBox="0 0 760 560" aria-hidden="true"
+           style="position:absolute; inset:0; width:100%; height:100%"></svg>
+    </div>
+  </div>
+
+  <div class="measure">
+    <p>The proportions below are measured off the reference and fixed in
+       <code>funnel.js</code> and <code>dialcell.js</code>. They are not tuning knobs:
+       change one and the grid and the poster change with it.</p>
+    <table id="ratios"></table>
+  </div>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script src="/vendor/d3.min.js"></script>
+<script src="/names.js"></script>
+<script src="/funnel.js"></script>
+<script src="/dialcell.js"></script>
+<script>
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const short = (n) => window.shortCountryName(n, 0);
+const fmtT = (v) => v >= 1e6 ? (v / 1e6).toFixed(2) + 'M t' : v >= 1e3 ? (v / 1e3).toFixed(0) + 'k t' : v.toFixed(0) + ' t';
+const S = { data: null, buyer: 0, rings: 9, R: 180, labelSize: 22, sweep: 219 };
+
+/* The arc's opening and the line's offset are the same number twice. The chord through the
+ * line cuts the rest of the circle away, so a sweep of S leaves the line at -cos(S/2) of the
+ * radius. The slider is in degrees because that is the thing being judged; the geometry
+ * wants the fraction. 219 degrees, which is 0.335 R, is the measured reference value, and it
+ * is what the grid and the poster use. */
+const offsetForSweep = (deg) => -Math.cos((deg * Math.PI / 180) / 2);
+
+const slotColour = (slot, n) => slot < 0 ? css('--cat-other')
+  : d3.interpolateYlOrBr(0.34 + (n <= 1 ? 0.5 : slot / (n - 1)) * 0.60);
+
+function draw() {
+  const imp = S.data.importers[S.buyer];
+  const svg = document.getElementById('dial');
+  svg.innerHTML = '';
+  const W = 760, H = 560, R = S.R;
+  const cell = window.dialCell({ imp, W, H, R, maxRibbons: S.rings, labelSize: S.labelSize, lineOffset: offsetForSweep(S.sweep) });
+
+  const tip = document.getElementById('tip');
+  const ribbons = window.paintDialCell(svg, cell, {
+    ink: css('--ink'), dim: css('--ink-2'), trend: css('--ink-3'),
+    stroke: css('--surface'), strokeWidth: 1,
+    totalText: fmtT(imp.qty),
+    fill: (b) => slotColour(b.source.slot, S.data.legend.length),
+  });
+
+  for (const { node, band } of ribbons) {
+    node.addEventListener('mousemove', (e) => {
+      tip.innerHTML = `<div class="t-name">${short(band.source.name)}</div>
+        <div class="t-row"><span class="t-num">${fmtT(band.source.value)}</span> · ${(band.share * 100).toFixed(1)}% of intake</div>`;
+      tip.classList.add('on');
+      tip.style.left = (e.clientX + 14) + 'px';
+      tip.style.top = (e.clientY + 14) + 'px';
+    });
+    node.addEventListener('mouseleave', () => tip.classList.remove('on'));
+  }
+
+  // Report the ratios actually produced, so a regression shows up rather than being argued about.
+  const pts = cell.trend ? [...cell.trend.d.matchAll(/[ML] (\S+) (\S+)/g)].map((m) => [+m[1], +m[2]]) : [];
+  const trendW = pts.length ? (pts[pts.length - 1][0] - pts[0][0]) / R : 0;
+  const trendH = pts.length ? (cell.centre.y - R * 0.06 - Math.min(...pts.map((p) => p[1]))) / R : 0;
+  const rows = [
+    ['Arc opening', S.sweep + '°', 'reference 219°'],
+    ['Line offset from centre', (-cell.line.x / R).toFixed(3) + ' R', 'reference 0.335 R'],
+    ['Line height', (cell.line.height / R).toFixed(3) + ' R', 'reference 0.600 R'],
+    ['Intake trend, width', trendW.toFixed(3) + ' R', 'spec 0.620 R'],
+    ['Intake trend, height', trendH.toFixed(3) + ' R', 'spec 0.200 R at the highest year'],
+    ['Trend to line, clearance', pts.length ? (((cell.centre.x + cell.line.x) - pts[pts.length - 1][0]) / R).toFixed(3) + ' R' : '-', 'spec 0.180 R'],
+    ['Points plotted', String(pts.length), imp.series.length + ' years reported'],
+  ];
+  document.getElementById('ratios').innerHTML = rows
+    .map(([a, b, c]) => `<tr><td>${a}</td><td><code>${b}</code></td><td>${c}</td></tr>`).join('');
+
+  drawOverlay(imp, W, H, R);
+}
+
+/** The same cell again, over the reference, drawn as outlines so both stay readable. */
+function drawOverlay(imp, W, H, R) {
+  const svg = document.getElementById('oDial');
+  svg.innerHTML = '';
+  const cell = window.dialCell({ imp, W, H, R, maxRibbons: S.rings, labelSize: S.labelSize, lineOffset: offsetForSweep(S.sweep) });
+  S.lastCell = cell;
+  window.paintDialCell(svg, cell, {
+    ink: '#c0392b', dim: '#c0392b', bar: 'none', stroke: '#c0392b', strokeWidth: 1.6,
+    lineOpacity: 1, totalText: '', fill: () => 'none',
+  });
+  for (const r of svg.querySelectorAll('rect')) { r.setAttribute('fill', 'none'); r.setAttribute('stroke', '#c0392b'); }
+  for (const t of svg.querySelectorAll('text')) t.remove();
+  syncOverlay();
+}
+
+/**
+ * Register the reference on our disc arithmetically rather than by eye.
+ *
+ * The reference is a bitmap trace, so its path data is noise, but its rim is a clean
+ * circle and a least-squares fit over the right-hand boundary pins it down: centre
+ * (937.6, 509.2), radius 498.6, in its own 1712x1024 frame. Scale and offset the image
+ * so that circle lands exactly on ours, and every remaining difference is a real
+ * difference in the construction rather than a difference in how it was placed.
+ */
+const REF = { cx: 937.6, cy: 509.2, R: 498.6, w: 1712 };
+
+function syncOverlay() {
+  const img = document.getElementById('oImg');
+  const box = document.getElementById('overlay').getBoundingClientRect();
+  const k = box.width / 760;                       // viewBox units to CSS px
+  const cell = S.lastCell;
+  if (!cell) return;
+
+  const s = (S.R * k) / REF.R;                     // image scale that matches the two rims
+  const tune = (+document.getElementById('oScale').value) / 100;
+  const tx = cell.centre.x * k - REF.cx * s * tune + (+document.getElementById('oX').value);
+  const ty = cell.centre.y * k - REF.cy * s * tune + (+document.getElementById('oY').value);
+
+  img.style.width = REF.w + 'px';
+  img.style.transform = `translate(${tx}px,${ty}px) scale(${s * tune})`;
+  img.style.opacity = (+document.getElementById('oFade').value) / 100;
+  for (const id of ['oScale', 'oX', 'oY', 'oFade']) {
+    document.getElementById(id + 'Val').textContent = document.getElementById(id).value;
+  }
+}
+for (const id of ['oScale', 'oX', 'oY', 'oFade']) {
+  document.getElementById(id).addEventListener('input', syncOverlay);
+}
+addEventListener('resize', syncOverlay);
+
+async function load() {
+  const p = new URLSearchParams({
+    items: 656, yearFrom: 2019, yearTo: 2023,
+    rule: 'max', expZone: 'all', impZone: 'all', topSources: 12, maxImporters: 36,
+  });
+  S.data = await (await fetch('/api/breakdown?' + p)).json();
+  const sel = document.getElementById('buyer');
+  sel.innerHTML = S.data.importers
+    .map((i, k) => `<option value="${k}">${short(i.name)} · ${fmtT(i.qty)}</option>`).join('');
+  draw();
+}
+
+document.getElementById('buyer').addEventListener('change', (e) => { S.buyer = +e.target.value; draw(); });
+document.getElementById('rings').addEventListener('input', (e) => {
+  S.rings = +e.target.value; document.getElementById('ringsVal').textContent = S.rings; draw();
+});
+document.getElementById('scale').addEventListener('input', (e) => {
+  S.R = +e.target.value; document.getElementById('scaleVal').textContent = S.R; draw();
+});
+document.getElementById('label').addEventListener('input', (e) => {
+  S.labelSize = +e.target.value; document.getElementById('labelVal').textContent = S.labelSize; draw();
+});
+document.getElementById('sweep').addEventListener('input', (e) => {
+  S.sweep = +e.target.value; document.getElementById('sweepVal').textContent = S.sweep + '°'; draw();
+});
+addEventListener('themechange', () => S.data && draw());
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,1470 @@
+{
+  "generatedAt": "2026-09-05T00:50:14.916Z",
+  "source": {
+    "name": "FAOSTAT Detailed Trade Matrix",
+    "domain": "TM",
+    "url": "https://www.fao.org/faostat/en/#data/TM",
+    "bulkFile": "Trade_DetailedTradeMatrix_E_All_Data_(Normalized).zip",
+    "bulkLastModified": "2025-12-23",
+    "licence": "CC BY-4.0"
+  },
+  "countries": [
+    {
+      "code": 1,
+      "m49": 51,
+      "name": "Armenia",
+      "continent": "Asia"
+    },
+    {
+      "code": 2,
+      "m49": 4,
+      "name": "Afghanistan",
+      "continent": "Asia"
+    },
+    {
+      "code": 3,
+      "m49": 8,
+      "name": "Albania",
+      "continent": "Europe"
+    },
+    {
+      "code": 4,
+      "m49": 12,
+      "name": "Algeria",
+      "continent": "Africa"
+    },
+    {
+      "code": 7,
+      "m49": 24,
+      "name": "Angola",
+      "continent": "Africa"
+    },
+    {
+      "code": 8,
+      "m49": 28,
+      "name": "Antigua and Barbuda",
+      "continent": "Americas"
+    },
+    {
+      "code": 9,
+      "m49": 32,
+      "name": "Argentina",
+      "continent": "Americas"
+    },
+    {
+      "code": 10,
+      "m49": 36,
+      "name": "Australia",
+      "continent": "Oceania"
+    },
+    {
+      "code": 11,
+      "m49": 40,
+      "name": "Austria",
+      "continent": "Europe"
+    },
+    {
+      "code": 12,
+      "m49": 44,
+      "name": "Bahamas",
+      "continent": "Americas"
+    },
+    {
+      "code": 13,
+      "m49": 48,
+      "name": "Bahrain",
+      "continent": "Asia"
+    },
+    {
+      "code": 14,
+      "m49": 52,
+      "name": "Barbados",
+      "continent": "Americas"
+    },
+    {
+      "code": 15,
+      "m49": 58,
+      "name": "Belgium-Luxembourg",
+      "continent": "Europe",
+      "historical": true
+    },
+    {
+      "code": 16,
+      "m49": 50,
+      "name": "Bangladesh",
+      "continent": "Asia"
+    },
+    {
+      "code": 18,
+      "m49": 64,
+      "name": "Bhutan",
+      "continent": "Asia"
+    },
+    {
+      "code": 19,
+      "m49": 68,
+      "name": "Bolivia (Plurinational State of)",
+      "continent": "Americas"
+    },
+    {
+      "code": 20,
+      "m49": 72,
+      "name": "Botswana",
+      "continent": "Africa"
+    },
+    {
+      "code": 21,
+      "m49": 76,
+      "name": "Brazil",
+      "continent": "Americas"
+    },
+    {
+      "code": 23,
+      "m49": 84,
+      "name": "Belize",
+      "continent": "Americas"
+    },
+    {
+      "code": 25,
+      "m49": 90,
+      "name": "Solomon Islands",
+      "continent": "Oceania"
+    },
+    {
+      "code": 26,
+      "m49": 96,
+      "name": "Brunei Darussalam",
+      "continent": "Asia"
+    },
+    {
+      "code": 27,
+      "m49": 100,
+      "name": "Bulgaria",
+      "continent": "Europe"
+    },
+    {
+      "code": 28,
+      "m49": 104,
+      "name": "Myanmar",
+      "continent": "Asia"
+    },
+    {
+      "code": 29,
+      "m49": 108,
+      "name": "Burundi",
+      "continent": "Africa"
+    },
+    {
+      "code": 31,
+      "m49": 74,
+      "name": "Bouvet Island",
+      "continent": "Other"
+    },
+    {
+      "code": 32,
+      "m49": 120,
+      "name": "Cameroon",
+      "continent": "Africa"
+    },
+    {
+      "code": 33,
+      "m49": 124,
+      "name": "Canada",
+      "continent": "Americas"
+    },
+    {
+      "code": 35,
+      "m49": 132,
+      "name": "Cabo Verde",
+      "continent": "Africa"
+    },
+    {
+      "code": 37,
+      "m49": 140,
+      "name": "Central African Republic",
+      "continent": "Africa"
+    },
+    {
+      "code": 38,
+      "m49": 144,
+      "name": "Sri Lanka",
+      "continent": "Asia"
+    },
+    {
+      "code": 39,
+      "m49": 148,
+      "name": "Chad",
+      "continent": "Africa"
+    },
+    {
+      "code": 40,
+      "m49": 152,
+      "name": "Chile",
+      "continent": "Americas"
+    },
+    {
+      "code": 41,
+      "m49": 156,
+      "name": "China, mainland",
+      "continent": "Asia"
+    },
+    {
+      "code": 44,
+      "m49": 170,
+      "name": "Colombia",
+      "continent": "Americas"
+    },
+    {
+      "code": 45,
+      "m49": 174,
+      "name": "Comoros",
+      "continent": "Africa"
+    },
+    {
+      "code": 46,
+      "m49": 178,
+      "name": "Congo",
+      "continent": "Africa"
+    },
+    {
+      "code": 47,
+      "m49": 184,
+      "name": "Cook Islands",
+      "continent": "Oceania"
+    },
+    {
+      "code": 48,
+      "m49": 188,
+      "name": "Costa Rica",
+      "continent": "Americas"
+    },
+    {
+      "code": 49,
+      "m49": 192,
+      "name": "Cuba",
+      "continent": "Americas"
+    },
+    {
+      "code": 50,
+      "m49": 196,
+      "name": "Cyprus",
+      "continent": "Asia"
+    },
+    {
+      "code": 51,
+      "m49": 200,
+      "name": "Czechoslovakia",
+      "continent": "Europe",
+      "historical": true
+    },
+    {
+      "code": 52,
+      "m49": 31,
+      "name": "Azerbaijan",
+      "continent": "Asia"
+    },
+    {
+      "code": 53,
+      "m49": 204,
+      "name": "Benin",
+      "continent": "Africa"
+    },
+    {
+      "code": 54,
+      "m49": 208,
+      "name": "Denmark",
+      "continent": "Europe"
+    },
+    {
+      "code": 55,
+      "m49": 212,
+      "name": "Dominica",
+      "continent": "Americas"
+    },
+    {
+      "code": 56,
+      "m49": 214,
+      "name": "Dominican Republic",
+      "continent": "Americas"
+    },
+    {
+      "code": 57,
+      "m49": 112,
+      "name": "Belarus",
+      "continent": "Europe"
+    },
+    {
+      "code": 58,
+      "m49": 218,
+      "name": "Ecuador",
+      "continent": "Americas"
+    },
+    {
+      "code": 59,
+      "m49": 818,
+      "name": "Egypt",
+      "continent": "Africa"
+    },
+    {
+      "code": 60,
+      "m49": 222,
+      "name": "El Salvador",
+      "continent": "Americas"
+    },
+    {
+      "code": 61,
+      "m49": 226,
+      "name": "Equatorial Guinea",
+      "continent": "Africa"
+    },
+    {
+      "code": 62,
+      "m49": 230,
+      "name": "Ethiopia PDR",
+      "continent": "Africa",
+      "historical": true
+    },
+    {
+      "code": 63,
+      "m49": 233,
+      "name": "Estonia",
+      "continent": "Europe"
+    },
+    {
+      "code": 64,
+      "m49": 234,
+      "name": "Faroe Islands",
+      "continent": "Europe"
+    },
+    {
+      "code": 66,
+      "m49": 242,
+      "name": "Fiji",
+      "continent": "Oceania"
+    },
+    {
+      "code": 67,
+      "m49": 246,
+      "name": "Finland",
+      "continent": "Europe"
+    },
+    {
+      "code": 68,
+      "m49": 250,
+      "name": "France",
+      "continent": "Europe"
+    },
+    {
+      "code": 69,
+      "m49": 254,
+      "name": "French Guiana",
+      "continent": "Americas"
+    },
+    {
+      "code": 70,
+      "m49": 258,
+      "name": "French Polynesia",
+      "continent": "Oceania"
+    },
+    {
+      "code": 72,
+      "m49": 262,
+      "name": "Djibouti",
+      "continent": "Africa"
+    },
+    {
+      "code": 73,
+      "m49": 268,
+      "name": "Georgia",
+      "continent": "Asia"
+    },
+    {
+      "code": 74,
+      "m49": 266,
+      "name": "Gabon",
+      "continent": "Africa"
+    },
+    {
+      "code": 75,
+      "m49": 270,
+      "name": "Gambia",
+      "continent": "Africa"
+    },
+    {
+      "code": 79,
+      "m49": 276,
+      "name": "Germany",
+      "continent": "Europe"
+    },
+    {
+      "code": 80,
+      "m49": 70,
+      "name": "Bosnia and Herzegovina",
+      "continent": "Europe"
+    },
+    {
+      "code": 81,
+      "m49": 288,
+      "name": "Ghana",
+      "continent": "Africa"
+    },
+    {
+      "code": 83,
+      "m49": 296,
+      "name": "Kiribati",
+      "continent": "Oceania"
+    },
+    {
+      "code": 84,
+      "m49": 300,
+      "name": "Greece",
+      "continent": "Europe"
+    },
+    {
+      "code": 86,
+      "m49": 308,
+      "name": "Grenada",
+      "continent": "Americas"
+    },
+    {
+      "code": 87,
+      "m49": 312,
+      "name": "Guadeloupe",
+      "continent": "Americas"
+    },
+    {
+      "code": 89,
+      "m49": 320,
+      "name": "Guatemala",
+      "continent": "Americas"
+    },
+    {
+      "code": 90,
+      "m49": 324,
+      "name": "Guinea",
+      "continent": "Africa"
+    },
+    {
+      "code": 91,
+      "m49": 328,
+      "name": "Guyana",
+      "continent": "Americas"
+    },
+    {
+      "code": 93,
+      "m49": 332,
+      "name": "Haiti",
+      "continent": "Americas"
+    },
+    {
+      "code": 95,
+      "m49": 340,
+      "name": "Honduras",
+      "continent": "Americas"
+    },
+    {
+      "code": 96,
+      "m49": 344,
+      "name": "China, Hong Kong SAR",
+      "continent": "Asia"
+    },
+    {
+      "code": 97,
+      "m49": 348,
+      "name": "Hungary",
+      "continent": "Europe"
+    },
+    {
+      "code": 98,
+      "m49": 191,
+      "name": "Croatia",
+      "continent": "Europe"
+    },
+    {
+      "code": 99,
+      "m49": 352,
+      "name": "Iceland",
+      "continent": "Europe"
+    },
+    {
+      "code": 100,
+      "m49": 356,
+      "name": "India",
+      "continent": "Asia"
+    },
+    {
+      "code": 101,
+      "m49": 360,
+      "name": "Indonesia",
+      "continent": "Asia"
+    },
+    {
+      "code": 102,
+      "m49": 364,
+      "name": "Iran (Islamic Republic of)",
+      "continent": "Asia"
+    },
+    {
+      "code": 103,
+      "m49": 368,
+      "name": "Iraq",
+      "continent": "Asia"
+    },
+    {
+      "code": 104,
+      "m49": 372,
+      "name": "Ireland",
+      "continent": "Europe"
+    },
+    {
+      "code": 105,
+      "m49": 376,
+      "name": "Israel",
+      "continent": "Asia"
+    },
+    {
+      "code": 106,
+      "m49": 380,
+      "name": "Italy",
+      "continent": "Europe"
+    },
+    {
+      "code": 107,
+      "m49": 384,
+      "name": "Côte d'Ivoire",
+      "continent": "Africa"
+    },
+    {
+      "code": 108,
+      "m49": 398,
+      "name": "Kazakhstan",
+      "continent": "Asia"
+    },
+    {
+      "code": 109,
+      "m49": 388,
+      "name": "Jamaica",
+      "continent": "Americas"
+    },
+    {
+      "code": 110,
+      "m49": 392,
+      "name": "Japan",
+      "continent": "Asia"
+    },
+    {
+      "code": 112,
+      "m49": 400,
+      "name": "Jordan",
+      "continent": "Asia"
+    },
+    {
+      "code": 113,
+      "m49": 417,
+      "name": "Kyrgyzstan",
+      "continent": "Asia"
+    },
+    {
+      "code": 114,
+      "m49": 404,
+      "name": "Kenya",
+      "continent": "Africa"
+    },
+    {
+      "code": 115,
+      "m49": 116,
+      "name": "Cambodia",
+      "continent": "Asia"
+    },
+    {
+      "code": 116,
+      "m49": 408,
+      "name": "Democratic People's Republic of Korea",
+      "continent": "Asia"
+    },
+    {
+      "code": 117,
+      "m49": 410,
+      "name": "Republic of Korea",
+      "continent": "Asia"
+    },
+    {
+      "code": 118,
+      "m49": 414,
+      "name": "Kuwait",
+      "continent": "Asia"
+    },
+    {
+      "code": 119,
+      "m49": 428,
+      "name": "Latvia",
+      "continent": "Europe"
+    },
+    {
+      "code": 120,
+      "m49": 418,
+      "name": "Lao People's Democratic Republic",
+      "continent": "Asia"
+    },
+    {
+      "code": 121,
+      "m49": 422,
+      "name": "Lebanon",
+      "continent": "Asia"
+    },
+    {
+      "code": 122,
+      "m49": 426,
+      "name": "Lesotho",
+      "continent": "Africa"
+    },
+    {
+      "code": 123,
+      "m49": 430,
+      "name": "Liberia",
+      "continent": "Africa"
+    },
+    {
+      "code": 124,
+      "m49": 434,
+      "name": "Libya",
+      "continent": "Africa"
+    },
+    {
+      "code": 126,
+      "m49": 440,
+      "name": "Lithuania",
+      "continent": "Europe"
+    },
+    {
+      "code": 127,
+      "m49": 584,
+      "name": "Marshall Islands",
+      "continent": "Oceania"
+    },
+    {
+      "code": 128,
+      "m49": 446,
+      "name": "China, Macao SAR",
+      "continent": "Asia"
+    },
+    {
+      "code": 129,
+      "m49": 450,
+      "name": "Madagascar",
+      "continent": "Africa"
+    },
+    {
+      "code": 130,
+      "m49": 454,
+      "name": "Malawi",
+      "continent": "Africa"
+    },
+    {
+      "code": 131,
+      "m49": 458,
+      "name": "Malaysia",
+      "continent": "Asia"
+    },
+    {
+      "code": 132,
+      "m49": 462,
+      "name": "Maldives",
+      "continent": "Asia"
+    },
+    {
+      "code": 133,
+      "m49": 466,
+      "name": "Mali",
+      "continent": "Africa"
+    },
+    {
+      "code": 134,
+      "m49": 470,
+      "name": "Malta",
+      "continent": "Europe"
+    },
+    {
+      "code": 135,
+      "m49": 474,
+      "name": "Martinique",
+      "continent": "Americas"
+    },
+    {
+      "code": 136,
+      "m49": 478,
+      "name": "Mauritania",
+      "continent": "Africa"
+    },
+    {
+      "code": 137,
+      "m49": 480,
+      "name": "Mauritius",
+      "continent": "Africa"
+    },
+    {
+      "code": 138,
+      "m49": 484,
+      "name": "Mexico",
+      "continent": "Americas"
+    },
+    {
+      "code": 140,
+      "m49": 492,
+      "name": "Monaco",
+      "continent": "Europe"
+    },
+    {
+      "code": 141,
+      "m49": 496,
+      "name": "Mongolia",
+      "continent": "Asia"
+    },
+    {
+      "code": 143,
+      "m49": 504,
+      "name": "Morocco",
+      "continent": "Africa"
+    },
+    {
+      "code": 144,
+      "m49": 508,
+      "name": "Mozambique",
+      "continent": "Africa"
+    },
+    {
+      "code": 145,
+      "m49": 583,
+      "name": "Micronesia (Federated States of)",
+      "continent": "Oceania"
+    },
+    {
+      "code": 146,
+      "m49": 498,
+      "name": "Republic of Moldova",
+      "continent": "Europe"
+    },
+    {
+      "code": 147,
+      "m49": 516,
+      "name": "Namibia",
+      "continent": "Africa"
+    },
+    {
+      "code": 148,
+      "m49": 520,
+      "name": "Nauru",
+      "continent": "Oceania"
+    },
+    {
+      "code": 149,
+      "m49": 524,
+      "name": "Nepal",
+      "continent": "Asia"
+    },
+    {
+      "code": 150,
+      "m49": 528,
+      "name": "Netherlands (Kingdom of the)",
+      "continent": "Europe"
+    },
+    {
+      "code": 153,
+      "m49": 540,
+      "name": "New Caledonia",
+      "continent": "Oceania"
+    },
+    {
+      "code": 154,
+      "m49": 807,
+      "name": "North Macedonia",
+      "continent": "Europe"
+    },
+    {
+      "code": 155,
+      "m49": 548,
+      "name": "Vanuatu",
+      "continent": "Oceania"
+    },
+    {
+      "code": 156,
+      "m49": 554,
+      "name": "New Zealand",
+      "continent": "Oceania"
+    },
+    {
+      "code": 157,
+      "m49": 558,
+      "name": "Nicaragua",
+      "continent": "Americas"
+    },
+    {
+      "code": 158,
+      "m49": 562,
+      "name": "Niger",
+      "continent": "Africa"
+    },
+    {
+      "code": 159,
+      "m49": 566,
+      "name": "Nigeria",
+      "continent": "Africa"
+    },
+    {
+      "code": 160,
+      "m49": 570,
+      "name": "Niue",
+      "continent": "Oceania"
+    },
+    {
+      "code": 162,
+      "m49": 578,
+      "name": "Norway",
+      "continent": "Europe"
+    },
+    {
+      "code": 165,
+      "m49": 586,
+      "name": "Pakistan",
+      "continent": "Asia"
+    },
+    {
+      "code": 166,
+      "m49": 591,
+      "name": "Panama",
+      "continent": "Americas"
+    },
+    {
+      "code": 167,
+      "m49": 203,
+      "name": "Czechia",
+      "continent": "Europe"
+    },
+    {
+      "code": 168,
+      "m49": 598,
+      "name": "Papua New Guinea",
+      "continent": "Oceania"
+    },
+    {
+      "code": 169,
+      "m49": 600,
+      "name": "Paraguay",
+      "continent": "Americas"
+    },
+    {
+      "code": 170,
+      "m49": 604,
+      "name": "Peru",
+      "continent": "Americas"
+    },
+    {
+      "code": 171,
+      "m49": 608,
+      "name": "Philippines",
+      "continent": "Asia"
+    },
+    {
+      "code": 173,
+      "m49": 616,
+      "name": "Poland",
+      "continent": "Europe"
+    },
+    {
+      "code": 174,
+      "m49": 620,
+      "name": "Portugal",
+      "continent": "Europe"
+    },
+    {
+      "code": 175,
+      "m49": 624,
+      "name": "Guinea-Bissau",
+      "continent": "Africa"
+    },
+    {
+      "code": 176,
+      "m49": 626,
+      "name": "Timor-Leste",
+      "continent": "Asia"
+    },
+    {
+      "code": 177,
+      "m49": 630,
+      "name": "Puerto Rico",
+      "continent": "Americas"
+    },
+    {
+      "code": 178,
+      "m49": 232,
+      "name": "Eritrea",
+      "continent": "Africa"
+    },
+    {
+      "code": 179,
+      "m49": 634,
+      "name": "Qatar",
+      "continent": "Asia"
+    },
+    {
+      "code": 180,
+      "m49": 585,
+      "name": "Palau",
+      "continent": "Oceania"
+    },
+    {
+      "code": 181,
+      "m49": 716,
+      "name": "Zimbabwe",
+      "continent": "Africa"
+    },
+    {
+      "code": 182,
+      "m49": 638,
+      "name": "Réunion",
+      "continent": "Africa"
+    },
+    {
+      "code": 183,
+      "m49": 642,
+      "name": "Romania",
+      "continent": "Europe"
+    },
+    {
+      "code": 184,
+      "m49": 646,
+      "name": "Rwanda",
+      "continent": "Africa"
+    },
+    {
+      "code": 185,
+      "m49": 643,
+      "name": "Russian Federation",
+      "continent": "Europe"
+    },
+    {
+      "code": 186,
+      "m49": 891,
+      "name": "Serbia and Montenegro",
+      "continent": "Europe",
+      "historical": true
+    },
+    {
+      "code": 188,
+      "m49": 659,
+      "name": "Saint Kitts and Nevis",
+      "continent": "Americas"
+    },
+    {
+      "code": 189,
+      "m49": 662,
+      "name": "Saint Lucia",
+      "continent": "Americas"
+    },
+    {
+      "code": 191,
+      "m49": 670,
+      "name": "Saint Vincent and the Grenadines",
+      "continent": "Americas"
+    },
+    {
+      "code": 193,
+      "m49": 678,
+      "name": "Sao Tome and Principe",
+      "continent": "Africa"
+    },
+    {
+      "code": 194,
+      "m49": 682,
+      "name": "Saudi Arabia",
+      "continent": "Asia"
+    },
+    {
+      "code": 195,
+      "m49": 686,
+      "name": "Senegal",
+      "continent": "Africa"
+    },
+    {
+      "code": 196,
+      "m49": 690,
+      "name": "Seychelles",
+      "continent": "Africa"
+    },
+    {
+      "code": 197,
+      "m49": 694,
+      "name": "Sierra Leone",
+      "continent": "Africa"
+    },
+    {
+      "code": 198,
+      "m49": 705,
+      "name": "Slovenia",
+      "continent": "Europe"
+    },
+    {
+      "code": 199,
+      "m49": 703,
+      "name": "Slovakia",
+      "continent": "Europe"
+    },
+    {
+      "code": 200,
+      "m49": 702,
+      "name": "Singapore",
+      "continent": "Asia"
+    },
+    {
+      "code": 201,
+      "m49": 706,
+      "name": "Somalia",
+      "continent": "Africa"
+    },
+    {
+      "code": 202,
+      "m49": 710,
+      "name": "South Africa",
+      "continent": "Africa"
+    },
+    {
+      "code": 203,
+      "m49": 724,
+      "name": "Spain",
+      "continent": "Europe"
+    },
+    {
+      "code": 206,
+      "m49": 736,
+      "name": "Sudan (former)",
+      "continent": "Africa",
+      "historical": true
+    },
+    {
+      "code": 207,
+      "m49": 740,
+      "name": "Suriname",
+      "continent": "Americas"
+    },
+    {
+      "code": 208,
+      "m49": 762,
+      "name": "Tajikistan",
+      "continent": "Asia"
+    },
+    {
+      "code": 209,
+      "m49": 748,
+      "name": "Eswatini",
+      "continent": "Africa"
+    },
+    {
+      "code": 210,
+      "m49": 752,
+      "name": "Sweden",
+      "continent": "Europe"
+    },
+    {
+      "code": 211,
+      "m49": 756,
+      "name": "Switzerland",
+      "continent": "Europe"
+    },
+    {
+      "code": 212,
+      "m49": 760,
+      "name": "Syrian Arab Republic",
+      "continent": "Asia"
+    },
+    {
+      "code": 213,
+      "m49": 795,
+      "name": "Turkmenistan",
+      "continent": "Asia"
+    },
+    {
+      "code": 214,
+      "m49": 158,
+      "name": "China, Taiwan Province of",
+      "continent": "Asia"
+    },
+    {
+      "code": 215,
+      "m49": 834,
+      "name": "United Republic of Tanzania",
+      "continent": "Africa"
+    },
+    {
+      "code": 216,
+      "m49": 764,
+      "name": "Thailand",
+      "continent": "Asia"
+    },
+    {
+      "code": 217,
+      "m49": 768,
+      "name": "Togo",
+      "continent": "Africa"
+    },
+    {
+      "code": 218,
+      "m49": 772,
+      "name": "Tokelau",
+      "continent": "Oceania"
+    },
+    {
+      "code": 219,
+      "m49": 776,
+      "name": "Tonga",
+      "continent": "Oceania"
+    },
+    {
+      "code": 220,
+      "m49": 780,
+      "name": "Trinidad and Tobago",
+      "continent": "Americas"
+    },
+    {
+      "code": 221,
+      "m49": 512,
+      "name": "Oman",
+      "continent": "Asia"
+    },
+    {
+      "code": 222,
+      "m49": 788,
+      "name": "Tunisia",
+      "continent": "Africa"
+    },
+    {
+      "code": 223,
+      "m49": 792,
+      "name": "Türkiye",
+      "continent": "Asia"
+    },
+    {
+      "code": 225,
+      "m49": 784,
+      "name": "United Arab Emirates",
+      "continent": "Asia"
+    },
+    {
+      "code": 226,
+      "m49": 800,
+      "name": "Uganda",
+      "continent": "Africa"
+    },
+    {
+      "code": 227,
+      "m49": 798,
+      "name": "Tuvalu",
+      "continent": "Oceania"
+    },
+    {
+      "code": 228,
+      "m49": 810,
+      "name": "USSR",
+      "continent": "Europe",
+      "historical": true
+    },
+    {
+      "code": 229,
+      "m49": 826,
+      "name": "United Kingdom of Great Britain and Northern Ireland",
+      "continent": "Europe"
+    },
+    {
+      "code": 230,
+      "m49": 804,
+      "name": "Ukraine",
+      "continent": "Europe"
+    },
+    {
+      "code": 231,
+      "m49": 840,
+      "name": "United States of America",
+      "continent": "Americas"
+    },
+    {
+      "code": 232,
+      "m49": 581,
+      "name": "United States Minor Outlying Islands",
+      "continent": "Oceania"
+    },
+    {
+      "code": 233,
+      "m49": 854,
+      "name": "Burkina Faso",
+      "continent": "Africa"
+    },
+    {
+      "code": 234,
+      "m49": 858,
+      "name": "Uruguay",
+      "continent": "Americas"
+    },
+    {
+      "code": 235,
+      "m49": 860,
+      "name": "Uzbekistan",
+      "continent": "Asia"
+    },
+    {
+      "code": 236,
+      "m49": 862,
+      "name": "Venezuela (Bolivarian Republic of)",
+      "continent": "Americas"
+    },
+    {
+      "code": 237,
+      "m49": 704,
+      "name": "Viet Nam",
+      "continent": "Asia"
+    },
+    {
+      "code": 238,
+      "m49": 231,
+      "name": "Ethiopia",
+      "continent": "Africa"
+    },
+    {
+      "code": 244,
+      "m49": 882,
+      "name": "Samoa",
+      "continent": "Oceania"
+    },
+    {
+      "code": 248,
+      "m49": 890,
+      "name": "Yugoslav SFR",
+      "continent": "Europe",
+      "historical": true
+    },
+    {
+      "code": 249,
+      "m49": 887,
+      "name": "Yemen",
+      "continent": "Asia"
+    },
+    {
+      "code": 250,
+      "m49": 180,
+      "name": "Democratic Republic of the Congo",
+      "continent": "Africa"
+    },
+    {
+      "code": 251,
+      "m49": 894,
+      "name": "Zambia",
+      "continent": "Africa"
+    },
+    {
+      "code": 255,
+      "m49": 56,
+      "name": "Belgium",
+      "continent": "Europe"
+    },
+    {
+      "code": 256,
+      "m49": 442,
+      "name": "Luxembourg",
+      "continent": "Europe"
+    },
+    {
+      "code": 272,
+      "m49": 688,
+      "name": "Serbia",
+      "continent": "Europe"
+    },
+    {
+      "code": 273,
+      "m49": 499,
+      "name": "Montenegro",
+      "continent": "Europe"
+    },
+    {
+      "code": 276,
+      "m49": 729,
+      "name": "Sudan",
+      "continent": "Africa"
+    },
+    {
+      "code": 277,
+      "m49": 728,
+      "name": "South Sudan",
+      "continent": "Africa"
+    },
+    {
+      "code": 299,
+      "m49": 275,
+      "name": "Palestine",
+      "continent": "Asia"
+    }
+  ],
+  "items": [
+    {
+      "code": 656,
+      "name": "Coffee, green"
+    },
+    {
+      "code": 657,
+      "name": "Coffee, decaffeinated or roasted"
+    },
+    {
+      "code": 658,
+      "name": "Coffee substitutes"
+    },
+    {
+      "code": 659,
+      "name": "Coffee extracts"
+    },
+    {
+      "code": 660,
+      "name": "Coffee husks and skins"
+    }
+  ],
+  "years": [
+    1986,
+    1987,
+    1988,
+    1989,
+    1990,
+    1991,
+    1992,
+    1993,
+    1994,
+    1995,
+    1996,
+    1997,
+    1998,
+    1999,
+    2000,
+    2001,
+    2002,
+    2003,
+    2004,
+    2005,
+    2006,
+    2007,
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "elements": {
+    "5610": "Import quantity (t)",
+    "5622": "Import value (1000 USD)",
+    "5910": "Export quantity (t)",
+    "5922": "Export value (1000 USD)"
+  },
+  "historicalSuccessors": {
+    "15": {
+      "name": "Belgium-Luxembourg",
+      "dissolvedAfter": 1999,
+      "successors": [
+        255,
+        256
+      ]
+    },
+    "51": {
+      "name": "Czechoslovakia",
+      "dissolvedAfter": 1992,
+      "successors": [
+        167,
+        199
+      ]
+    },
+    "62": {
+      "name": "Ethiopia PDR",
+      "dissolvedAfter": 1992,
+      "successors": [
+        238,
+        178
+      ]
+    },
+    "186": {
+      "name": "Serbia and Montenegro",
+      "dissolvedAfter": 2005,
+      "successors": [
+        272,
+        273
+      ]
+    },
+    "206": {
+      "name": "Sudan (former)",
+      "dissolvedAfter": 2011,
+      "successors": [
+        276,
+        277
+      ]
+    },
+    "228": {
+      "name": "USSR",
+      "dissolvedAfter": 1991,
+      "successors": [
+        185,
+        230,
+        57,
+        119,
+        126,
+        63,
+        73,
+        1,
+        52,
+        108,
+        113,
+        146,
+        208,
+        213,
+        235
+      ]
+    },
+    "248": {
+      "name": "Yugoslav SFR",
+      "dissolvedAfter": 1991,
+      "successors": [
+        98,
+        198,
+        154,
+        80,
+        272,
+        273
+      ]
+    }
+  },
+  "stats": {
+    "rawRows": 1146158,
+    "flows": 409785,
+    "skippedSelfTrade": 1346,
+    "skippedUnparsed": 0,
+    "skippedNoValue": 0,
+    "quantityBothSidesReported": 162621,
+    "quantityOnlyImporterReported": 141660,
+    "quantityOnlyExporterReported": 105504,
+    "medianMirrorAgreement": 0.5222671494385663,
+    "flagCounts": {
+      "A": 1136232,
+      "I": 5844,
+      "X": 2663,
+      "E": 73
+    }
+  },
+  "notes": [
+    "Each flow is exporter -> importer. Import- and export-reported figures are both kept; the reconciliation rule is applied at serve time.",
+    "Import values are CIF (include freight and insurance) while export values are FOB, so import values run systematically higher. Quantities are unaffected.",
+    "Historical states (USSR, Czechoslovakia, Yugoslav SFR, Belgium-Luxembourg, Ethiopia PDR, Sudan former) are preserved so pre-1993 years stay accurate."
+  ]
+}

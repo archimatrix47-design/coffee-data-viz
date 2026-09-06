@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Global Coffee Trade · Flows</title>
+<link rel="stylesheet" href="/shared.css">
+<script src="/theme.js"></script>
+<style>
+  .stage {
+    display: grid; grid-template-columns: minmax(0,1fr) 304px;
+    align-items: start; gap: 0;
+  }
+  @media (max-width: 1080px) { .stage { grid-template-columns: 1fr; } }
+
+  .headline { padding: var(--s-9) var(--gutter) var(--s-5); max-width: 960px; margin: 0 auto; }
+  .headline h2 { margin: 0; font-size: var(--t-h1); line-height: var(--lh-h1); }
+  .headline p { margin: var(--s-4) 0 0; color: var(--ink-2); font-size: var(--t-small); max-width: 64ch; }
+
+  .canvas-wrap { position: relative; padding: 0 var(--gutter) var(--s-8); }
+  #chord {
+    display: block; width: 100%; margin: 0 auto;
+    height: calc(100vh - 320px); min-height: 420px; max-height: 900px;
+  }
+
+  .side {
+    position: sticky; top: 0; align-self: start;
+    max-height: 100vh; overflow-y: auto;
+    padding: var(--s-8) var(--s-7) var(--s-10);
+    border-left: 1px solid var(--line); background: var(--surface);
+  }
+  .side section + section { margin-top: var(--s-9); }
+
+  .focus-name { font-size: var(--t-h3); font-weight: 600; letter-spacing: -.005em; }
+  .focus-hint { color: var(--ink-2); font-size: var(--t-caption); }
+  .partner {
+    display: flex; justify-content: space-between; gap: var(--s-5);
+    padding: var(--s-3) 0; font-size: var(--t-caption);
+    border-bottom: 1px solid var(--line);
+  }
+  .partner .p-n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .partner .p-v { font-variant-numeric: tabular-nums; color: var(--ink-2); flex: none; }
+  .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: var(--s-3); }
+  .scale-key { font-size: var(--t-small); font-weight: 650; font-variant-numeric: tabular-nums; }
+
+  .arc-label { font-size: 11px; fill: var(--ink-2); pointer-events: none; }
+  .arc-label.on { fill: var(--ink); font-weight: 650; }
+  .strands { mix-blend-mode: multiply; }
+  @media (prefers-color-scheme: dark) { :root:where(:not([data-theme=light])) .strands { mix-blend-mode: screen; } }
+  :root[data-theme=dark] .strands { mix-blend-mode: screen; }
+  .side-caption { font-size: 10px; font-weight: 650; letter-spacing: .16em; fill: var(--ink-3); }
+
+  #tableView { display: none; padding: 0 var(--gutter) var(--s-12); max-width: 960px; margin: 0 auto; }
+  #tableView.on { display: block; }
+  .table-wrap { max-height: 460px; overflow: auto; border-radius: var(--r-md); box-shadow: var(--e-1); }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <h1>Global Coffee Trade</h1>
+  <span class="sub">FAOSTAT bilateral trade matrix · 1986–2024</span>
+  <nav class="pages">
+    <a href="/" aria-current="page">Flows</a>
+    <a href="/network">Map</a>
+    <a href="/breakdown">Breakdown</a>
+    <a href="/poster">Poster</a>
+  </nav>
+  <button class="theme-toggle" id="themeToggle" type="button"></button>
+</header>
+
+<div class="controls">
+  <div class="cgroup">
+    <div class="ctl">
+      <label for="item">Product</label>
+      <select id="item"></select>
+    </div>
+    <div class="ctl">
+      <span class="ctl-label">Measure</span>
+      <div class="seg" id="metric">
+        <button data-v="qty" aria-pressed="true">Quantity</button>
+        <button data-v="value" aria-pressed="false">Value</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cgroup">
+    <div class="ctl">
+      <label for="expZone">Sellers from</label>
+      <select id="expZone"></select>
+    </div>
+    <div class="ctl">
+      <label for="impZone">Buyers in</label>
+      <select id="impZone"></select>
+    </div>
+  </div>
+
+  <div class="cgroup tr-group">
+    <div id="timeRange"></div>
+  </div>
+
+  <div class="cgroup">
+    <div class="ctl">
+      <label for="topN">Per side <span class="val" id="topNVal">12</span></label>
+      <input type="range" id="topN" min="4" max="30" value="12" step="1">
+    </div>
+    <div class="ctl">
+      <label for="scale">Strand scale</label>
+      <select id="scale"><option value="auto">Auto</option></select>
+    </div>
+    <div class="ctl">
+      <label for="rule">Reported by</label>
+      <select id="rule">
+        <option value="importer">Importer (preferred)</option>
+        <option value="exporter">Exporter</option>
+        <option value="max">Higher of the two</option>
+        <option value="mean">Mean of the two</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="cgroup">
+    <div class="ctl">
+      <span class="ctl-label">Options</span>
+      <label class="chk"><input type="checkbox" id="showOther" checked> Group the rest</label>
+    </div>
+    <div class="ctl">
+      <span class="ctl-label">&nbsp;</span>
+      <label class="chk"><input type="checkbox" id="showTable"> Table</label>
+    </div>
+    <div class="ctl">
+      <span class="ctl-label">&nbsp;</span>
+      <button class="btn-accent" id="toPoster" title="Open this exact view in the poster exporter">Make poster →</button>
+    </div>
+  </div>
+</div>
+
+<div class="headline">
+  <h2 class="display" id="title">Green coffee, 2024</h2>
+  <p id="blurb">Sellers fill the right half of the circle, buyers the left, so every strand crosses the middle.
+     Each strand is a fixed quantity of coffee, count them to read the trade. Colour deepens with volume, and
+     each side is scaled against its own largest. Click a country to hold focus on its flows alone.</p>
+</div>
+
+<div class="stage">
+  <div class="canvas-wrap">
+    <div class="chips" id="chips" hidden></div>
+    <div class="loading" id="loading">Loading trade data…</div>
+    <svg id="chord" viewBox="0 0 900 900" role="img" aria-labelledby="title"></svg>
+  </div>
+
+  <aside class="side">
+    <section>
+      <p class="eyebrow">Scale</p>
+      <div class="scale-key" id="scaleKey"></div>
+      <svg id="scaleSwatch" width="120" height="26" aria-hidden="true"></svg>
+      <p class="note" id="scaleNote"></p>
+    </section>
+
+    <section>
+      <p class="eyebrow">Colour</p>
+      <div class="legend"><span>Origin</span><span class="ramp"></span><span>Market</span></div>
+      <p class="note" style="margin-top:var(--s-4)">
+        Hue is the side of the trade a country is on. Lightness is how much it moved -
+        the more it trades, the stronger the colour, with sellers and buyers ranked
+        separately, so the biggest of each reads at full strength.
+      </p>
+    </section>
+
+    <section id="focusBox">
+      <p class="eyebrow">Selection</p>
+      <div class="focus-name" id="focusName">No country selected</div>
+      <div class="focus-hint" id="focusHint">Click any arc to focus it.</div>
+      <div id="focusList" style="margin-top:var(--s-5)"></div>
+    </section>
+
+    <section>
+      <p class="eyebrow">This view</p>
+      <div id="stats"></div>
+    </section>
+
+    <section>
+      <p class="eyebrow">Data quality</p>
+      <p class="note" id="quality"></p>
+    </section>
+  </aside>
+</div>
+
+<div id="tableView">
+  <p class="eyebrow">Flows shown</p>
+  <div class="table-wrap"><table class="data" id="flowTable"></table></div>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script src="/vendor/d3.min.js"></script>
+<script src="/names.js"></script>
+<script src="/filters.js"></script>
+<script src="/colour.js"></script>
+<script src="/timerange.js"></script>
+<script src="/motion.js"></script>
+<script src="/chord.js"></script>
+</body>
+</html>

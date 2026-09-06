@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Global Coffee Trade · Breakdown</title>
+<link rel="stylesheet" href="/shared.css">
+<script src="/theme.js"></script>
+<style>
+  .sheet { max-width: 1180px; margin: 0 auto; padding: 22px 24px 60px; }
+
+  .head { display: grid; grid-template-columns: minmax(0,1fr) 380px; gap: 28px; align-items: start; }
+  @media (max-width: 900px) { .head { grid-template-columns: 1fr; } }
+  .head h2 {
+    margin: 0; font-size: clamp(26px, 3.4vw, 42px); font-weight: 720;
+    letter-spacing: -.028em; line-height: 1.06;
+  }
+  .head h2 .yr { font-weight: 500; color: var(--text-secondary); }
+  .head .src { margin: 10px 0 0; font-size: 12px; color: var(--ink-2); }
+
+  /* Two separate panels, deliberately not one dual-axis chart. */
+  .trend { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .trend .panel-box { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--surface-1); }
+  .trend h4 { margin: 0 0 2px; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-2); font-weight: 650; }
+  .trend .big { font-size: 16px; font-weight: 680; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+  .trend svg { display: block; width: 100%; height: 62px; margin-top: 4px; }
+  .trend .ax { font-size: 9.5px; fill: var(--text-muted); }
+
+  .grid {
+    margin-top: 30px; display: grid; gap: 20px 16px;
+    grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
+  }
+  .grid[hidden] { display: none; }
+  /* Below ~408px a 196px minimum collapses to one column, turning 36 buyers into 36
+     full-width rows. Two narrower columns is a shorter scroll and still legible. */
+  @media (max-width: 520px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 10px; }
+  }
+  /* The dial is drawn to a 196x116 viewBox. A fixed pixel height with width:100% letterboxes
+     it in any column wider than that, wasting up to 40% of the card; an aspect ratio scales
+     the drawing to whatever column it lands in. */
+  .dialcard .dial { width: 100%; height: auto; aspect-ratio: 196 / 116; }
+
+  /* The reading comes before the evidence, at reading size, not caption size. */
+  .finding {
+    margin: var(--s-6) 0 0; max-width: 62ch;
+    font-size: var(--t-lede, 15.5px); line-height: 1.6; color: var(--ink-2);
+  }
+  .finding[hidden] { display: none; }
+  .finding b { color: var(--ink); font-weight: 650; }
+
+  .empty {
+    margin-top: 30px; padding: var(--s-9) var(--s-8);
+    border: 1px dashed var(--line-strong); border-radius: var(--r-lg);
+    background: var(--fill-1); text-align: center;
+  }
+  .empty[hidden] { display: none; }
+  .empty .empty-t { margin: 0 0 var(--s-4); font-size: var(--t-body); color: var(--ink); font-weight: 600; }
+  .empty .empty-s { margin: 0; font-size: var(--t-caption); color: var(--ink-2); }
+  /* Label block left, circle right, with the circle's notch opening toward the
+     label, the arrangement in the reference. */
+  .dialcard { display: block; }
+  .dialcard .dial { display: block; overflow: visible; }
+
+  .dialcard .art { display: flex; align-items: center; gap: var(--s-3); }
+  .dialcard .donut { display: block; overflow: visible; flex: none; }
+  .dialcard .spark { display: block; flex: none; }
+  .dialcard .nm { font-size: 12.5px; font-weight: 650; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
+  .dialcard .tot { font-size: 11.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+  .dialcard:hover .donut { filter: brightness(1.06); }
+
+  .legend-grid {
+    margin-top: 34px; padding-top: 18px; border-top: 1px solid var(--border);
+    display: grid; gap: 5px 16px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  .lg { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--text-secondary); }
+  .lg i { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+  .lg .v { margin-left: auto; color: var(--ink-2); font-variant-numeric: tabular-nums; font-size: 11px; }
+
+  .howto {
+    margin-top: 26px; display: flex; gap: 14px; align-items: flex-start;
+    font-size: 11.5px; color: var(--ink-2); line-height: 1.5;
+  }
+  .howto svg { flex: none; }
+  .loading { padding: 40px 0; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <h1>Global Coffee Trade</h1>
+  <span class="sub">Breakdown by buyer · FAOSTAT</span>
+  <nav class="pages">
+    <a href="/">Flows</a>
+    <a href="/network">Map</a>
+    <a href="/breakdown" aria-current="page">Breakdown</a>
+    <a href="/poster">Poster</a>
+  </nav>
+  <button class="theme-toggle" id="themeToggle" type="button"></button>
+</header>
+
+<div class="controls">
+  <div class="cgroup">
+    <div class="ctl">
+      <label for="item">Product</label>
+      <select id="item"></select>
+    </div>
+  </div>
+
+  <div class="cgroup">
+    <div class="ctl">
+      <label for="expZone">Sellers from</label>
+      <select id="expZone"></select>
+    </div>
+    <div class="ctl">
+      <label for="impZone">Buyers in</label>
+      <select id="impZone"></select>
+    </div>
+  </div>
+
+  <div class="cgroup tr-group">
+    <div id="timeRange"></div>
+  </div>
+
+  <div class="cgroup">
+    <div class="ctl">
+      <label for="topSources">Named origins <span class="val" id="topSourcesVal">12</span></label>
+      <input type="range" id="topSources" min="4" max="24" value="12" step="1">
+    </div>
+    <div class="ctl">
+      <label for="rule">Reported by</label>
+      <select id="rule">
+        <option value="importer">Importer (preferred)</option>
+        <option value="exporter">Exporter</option>
+        <option value="max">Higher of the two</option>
+        <option value="mean">Mean of the two</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="cgroup">
+    <div class="ctl">
+      <span class="ctl-label">Dials</span>
+      <label class="chk"><input type="checkbox" id="sizeByVolume"> Size by volume</label>
+      <label class="chk"><input type="checkbox" id="showTable"> Table</label>
+    </div>
+    <div class="ctl">
+      <span class="ctl-label">&nbsp;</span>
+      <button class="btn-accent" id="toPoster" title="Open this view in the poster exporter">Make poster →</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet">
+  <div class="head">
+    <div>
+      <h2 class="display" id="title">-</h2>
+      <p class="src">Source of data: <strong>FAOSTAT detailed trade matrix</strong> · <span id="ruleNote"></span></p>
+    </div>
+
+    <div class="trend">
+      <div class="panel-box">
+        <h3>Total imported</h3>
+        <div class="big" id="totQty">-</div>
+        <svg id="qtyChart" role="img" aria-label="Quantity imported by year"></svg>
+      </div>
+      <div class="panel-box">
+        <h3>Total value</h3>
+        <div class="big" id="totVal">-</div>
+        <svg id="valChart" role="img" aria-label="Value imported by year"></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">Loading…</div>
+  <p class="finding" id="finding" hidden></p>
+  <div class="chips" id="chips" hidden></div>
+  <div class="empty" id="emptyState" hidden></div>
+  <div class="grid" id="grid"></div>
+
+  <div class="legend-grid" id="legend"></div>
+
+  <div class="howto">
+    <svg width="86" height="86" viewBox="0 0 86 86" id="howtoArt" aria-hidden="true"></svg>
+    <div>
+      <strong id="howtoTitle">How to read this</strong><br>
+      <span id="howtoBody"></span>
+    </div>
+  </div>
+</div>
+
+<div class="table-panel" id="tableView">
+  <p class="eyebrow">Buyers and their origins</p>
+  <div class="table-wrap"><table class="data" id="buyerTable"></table></div>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script src="/vendor/d3.min.js"></script>
+<script src="/names.js"></script>
+<script src="/filters.js"></script>
+<script src="/colour.js"></script>
+<script src="/timerange.js"></script>
+<script src="/funnel.js"></script>
+<script src="/dialcell.js"></script>
+<script src="/motion.js"></script>
+<script src="/breakdown.js"></script>
+</body>
+</html>

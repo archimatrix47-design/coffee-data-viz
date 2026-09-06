@@ -175,6 +175,31 @@ app.use((req, res, next) => {
   next();
 });
 
+/**
+ * Let the CDN answer repeat API requests.
+ *
+ * This matters more than it looks. Netlify's free tier is a HARD cap: 125,000 function
+ * invocations a month, and past it the site goes off the air until the 1st, rather than
+ * degrading or billing. Every page load makes three or four API calls and /api/meta is
+ * identical for everybody, so uncached that is roughly 31,000 page views before the site
+ * disappears.
+ *
+ * A long TTL is correct here, not a compromise. The dataset is immutable between deploys,
+ * it only changes when the monthly refresh commits a new flows.json, and that commit
+ * triggers a deploy, which purges Netlify's CDN cache. So the cache can never serve data
+ * older than the current deploy.
+ *
+ * Netlify-CDN-Cache-Control governs the edge; Cache-Control governs the browser and is kept
+ * shorter so a viewer picks up a refresh within the hour without a hard reload.
+ */
+app.use('/api', (req, res, next) => {
+  if (req.method === 'GET') {
+    res.set('Cache-Control', 'public, max-age=600');
+    res.set('Netlify-CDN-Cache-Control', 'public, s-maxage=604800, stale-while-revalidate=86400, durable');
+  }
+  next();
+});
+
 app.use(express.static(path.join(ROOT, 'web'), { extensions: ['html'] }));
 
 app.get('/api/meta', (_req, res) => {

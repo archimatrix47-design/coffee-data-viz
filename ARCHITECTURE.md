@@ -338,6 +338,10 @@ publishes itself.
   into a second, worse drawing of the flow lines, which already carry tonnage. The point is
   the reading the lines cannot give: Brazil's biggest route by tonnage is Germany at 42%,
   its biggest by dependence is Argentina at 90%.
+- **Do not set NODE_ENV=production in a Netlify build.** npm then skips devDependencies for
+  the whole build, which is silent until something in the build needs one. The dev-route gate
+  reads ALLOW_DEV_ROUTES first and only falls back to NODE_ENV, so the flag is the thing to
+  set: explicit about what it closes, and it leaves the install whole.
 - **Radius is a size channel; it never touches the angle.** In the grid the radius carries
   the buyer's volume, so if it also moved the arc's opening no two dials would have
   comparable shapes. The angle is set by the line's offset from the centre, and because that

@@ -5,9 +5,12 @@
 
 [build.environment]
   NODE_VERSION = "22"
-  # Switches off the study harness, the reference viewer and the local-save endpoint.
-  # The static half of that is handled by the build excluding those files entirely.
-  NODE_ENV = "production"
+  # Closes the study harness, the reference viewer and the local-save endpoint. This is the
+  # flag rather than NODE_ENV on purpose: NODE_ENV=production during the build makes npm skip
+  # devDependencies, which is a trap waiting for whoever adds a build step that needs one
+  # (the vendor-bundle rebuild in the README uses esbuild, which lives there). The server
+  # already prefers this flag over NODE_ENV, so the gate is explicit and the install is whole.
+  ALLOW_DEV_ROUTES = "0"
 
 [functions]
   node_bundler = "esbuild"

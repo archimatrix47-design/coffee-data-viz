@@ -338,6 +338,13 @@ publishes itself.
   into a second, worse drawing of the flow lines, which already carry tonnage. The point is
   the reading the lines cannot give: Brazil's biggest route by tonnage is Germany at 42%,
   its biggest by dependence is Argentina at 90%.
+- **Never assume the module format survives bundling.** `import.meta.url` is ESM-only, and a
+  bundler targeting CommonJS leaves it undefined. `fileURLToPath(undefined)` then throws at
+  module scope, which kills the container before a line of the app runs and produces a 502
+  with an empty body: no message, no stack, nothing to read but the platform's own log. Top
+  level `await` fails the same way, and worse, because a guard placed around the import cannot
+  run if the file holding it will not parse. Both are now written to work either way, and both
+  bundles are exercised before deploying.
 - **Do not set NODE_ENV=production in a Netlify build.** npm then skips devDependencies for
   the whole build, which is silent until something in the build needs one. The dev-route gate
   reads ALLOW_DEV_ROUTES first and only falls back to NODE_ENV, so the flag is the thing to

@@ -13,7 +13,20 @@ import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { ZONES, zoneCodes, zoneLabel, zoneTitleLabel } from '../pipeline/zones.mjs';
 
-const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
+/**
+ * Where this file sits, whichever module system it ends up in.
+ *
+ * import.meta.url is ESM-only. A bundler targeting CommonJS leaves it undefined, and
+ * fileURLToPath(undefined) throws at module scope, which kills the container before a single
+ * line of the app runs and produces a 502 with an empty body. Netlify's bundler chooses the
+ * format, so this file cannot assume it got the one it was written in.
+ */
+const HERE = (() => {
+  try { return path.dirname(fileURLToPath(import.meta.url)); }
+  catch { return typeof __dirname === 'string' ? __dirname : process.cwd(); }
+})();
+
+const ROOT = path.join(HERE, '..');
 
 /**
  * Find data/processed, without assuming this file is where it was written.
@@ -654,8 +667,13 @@ app.use((err, _req, res, _next) => {
  * the runtime, where calling listen() would bind a port nothing is connected to and hold the
  * container open.
  */
-const RUN_DIRECTLY = process.argv[1]
-  && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const RUN_DIRECTLY = (() => {
+  try {
+    return !!process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+  } catch {
+    return false;   // bundled into a function: never the program being run
+  }
+})();
 
 export { app };
 

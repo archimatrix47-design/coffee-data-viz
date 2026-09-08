@@ -19,6 +19,14 @@
   # shipping it as a file next to the function keeps JSON.parse on a real file.
   included_files = ["data/processed/**"]
 
+# A dependency-free canary. If /api 502s but this answers, functions work and the fault is in
+# the app; if both 502, the app is not the problem.
+[[redirects]]
+  from = "/health"
+  to = "/.netlify/functions/health"
+  status = 200
+  force = true
+
 # The API. Everything under /api is one function holding the whole Express app.
 [[redirects]]
   from = "/api/*"

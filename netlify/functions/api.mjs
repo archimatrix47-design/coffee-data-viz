@@ -14,26 +14,45 @@
  * WHAT THIS COSTS. The app is fast because the flow table lives in memory as typed arrays and
  * a filter change is one linear scan of 409,785 rows rather than a re-query. A container keeps
  * that between invocations, so warm requests behave like the local server, measured at 1-14ms.
- * A cold container parses 12MB of JSON first, about 130ms locally. The import stays at module
- * scope, top-level await and all, so that parse still happens during container init rather
- * than inside the first request.
+ * A cold container parses 12MB of JSON first, about 130ms locally. That parse now happens on
+ * the first request rather than during init, for the reason given on ensureInit below.
  */
 
+import fs from 'node:fs';
 import serverless from 'serverless-http';
 
 let wrapped = null;
 let initError = null;
+let initDone = false;
 
-try {
-  const mod = await import('../../server/index.mjs');
-  wrapped = serverless(mod.app, {
-    // 80MB of poster PNG has nowhere to go here, and the save endpoint is off in production
-    // anyway. A malformed request should fail fast rather than buffer into the function.
-    binary: false,
-  });
-} catch (err) {
-  initError = err;
-  console.error('Function failed to initialise:', err);
+/**
+ * Load the app on first use, not at module scope.
+ *
+ * This was a top-level await, which is the likely reason the previous attempt to report the
+ * failure never worked: top-level await is valid ESM but a syntax error in CommonJS, so if the
+ * bundler emits CJS the file does not parse at all, the container dies before any of this
+ * runs, and the platform answers 502 with an empty body. Guarding an import is pointless if
+ * the guard cannot load either.
+ *
+ * Doing it lazily costs the difference between init-phase and first-request work: the 12MB
+ * parse now lands on the first request to a cold container rather than before it. It is still
+ * once per container, so warm requests are unchanged, and it works whichever module format
+ * the bundler chooses.
+ */
+async function ensureInit() {
+  if (initDone) return;
+  initDone = true;
+  try {
+    const mod = await import('../../server/index.mjs');
+    wrapped = serverless(mod.app, {
+      // 80MB of poster PNG has nowhere to go here, and the save endpoint is off in production
+      // anyway. A malformed request should fail fast rather than buffer into the function.
+      binary: false,
+    });
+  } catch (err) {
+    initError = err;
+    console.error('Function failed to initialise:', err);
+  }
 }
 
 const json = (statusCode, body) => ({
@@ -42,22 +61,27 @@ const json = (statusCode, body) => ({
   body: JSON.stringify(body),
 });
 
+/** import.meta is ESM-only; under a CJS bundle this is simply unknown, not fatal. */
+function safeModuleDir() {
+  try { return new URL('.', import.meta.url).pathname; }
+  catch { return typeof __dirname === 'string' ? __dirname : 'unknown'; }
+}
+
 /** Never let a diagnostic throw; a failed listing is itself part of the answer. */
 function safeList(dir) {
   try {
-    return fsSync.readdirSync(dir).slice(0, 40);
+    return fs.readdirSync(dir).slice(0, 40);
   } catch (e) {
     return `unreadable: ${e.message}`;
   }
 }
 
-let fsSync;
-try { fsSync = (await import('node:fs')).default; } catch { /* reported below */ }
-
 export const handler = async (event, context) => {
   // Without this the runtime waits for the event loop to drain on every invocation, which
   // costs the full timeout once anything schedules a timer.
   context.callbackWaitsForEmptyEventLoop = false;
+
+  await ensureInit();
 
   if (initError) {
     const cwd = process.cwd();
@@ -68,7 +92,10 @@ export const handler = async (event, context) => {
       // lookup expects, so report what the container can actually see. One request, and the
       // real layout is known rather than guessed at.
       cwd,
-      moduleDir: new URL('.', import.meta.url).pathname,
+      // Wrapped because import.meta.url does not survive a CommonJS bundle, and a diagnostic
+      // that throws inside the error handler turns a useful 500 back into the 502 it exists
+      // to replace.
+      moduleDir: safeModuleDir(),
       taskContents: safeList(cwd),
       dataContents: safeList(cwd + '/data'),
       processedContents: safeList(cwd + '/data/processed'),

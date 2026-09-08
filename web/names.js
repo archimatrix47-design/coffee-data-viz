@@ -41,6 +41,10 @@ window.SHORT_NAMES = {
   'Papua New Guinea': 'Papua N. Guinea',
   'United Arab Emirates': 'UAE',
   'Brunei Darussalam': 'Brunei',
+  // FAOSTAT follows the UN's official two-word name. It is not wrong, but every other
+  // official name here is already mapped to the common English one, so leaving this
+  // reads as an oversight rather than a decision.
+  'Viet Nam': 'Vietnam',
 };
 
 /** `max` of 0 means no truncation. */

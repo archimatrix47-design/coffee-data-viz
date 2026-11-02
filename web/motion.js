@@ -42,6 +42,31 @@
       if (el.getBoundingClientRect().top < fold) el.classList.add('is-in');
       else io.observe(el);
     }
+
+    // Content must not depend on an animation firing.
+    //
+    // Scroll fast enough and the observer does not keep up: scrolling a 36-card grid end to
+    // end in one gesture left nine cards still at opacity 0, permanently, because they were
+    // never reported as intersecting and the page had already moved past them. The entrance is
+    // a nicety; the dial is the product. Anything still hidden after this gets shown outright,
+    // and the sweep repeats while there is anything left to show.
+    let sweeps = 0;
+    const sweep = () => {
+      const left = items.filter((el) => !el.classList.contains('is-in'));
+      for (const el of left) {
+        if (el.getBoundingClientRect().top < innerHeight * 1.5) {
+          el.style.transitionDelay = '0ms';
+          el.classList.add('is-in');
+          io.unobserve(el);
+        }
+      }
+      if (items.some((el) => !el.classList.contains('is-in')) && ++sweeps < 40) {
+        setTimeout(sweep, 400);
+      }
+    };
+    setTimeout(sweep, 600);
+    // A reader who leaves and comes back should not find holes either.
+    addEventListener('pageshow', () => setTimeout(sweep, 50));
   }
 
   window.revealIn = reveal;

@@ -88,6 +88,8 @@
 </head>
 <body>
 
+<a class="skip-link" href="#grid">Skip to the visualisation</a>
+
 <header class="topbar">
   <h1>Global Coffee Trade</h1>
   <span class="sub">Breakdown by buyer · FAOSTAT</span>
@@ -125,8 +127,11 @@
 
   <div class="cgroup">
     <div class="ctl">
-      <label for="topSources">Named origins <span class="val" id="topSourcesVal">12</span></label>
-      <input type="range" id="topSources" min="4" max="24" value="12" step="1">
+      <label for="topSources">Named origins <span class="val" id="topSourcesVal">8</span></label>
+      <!-- Capped at 8: that is how many hues the palette validates for. A ninth cannot be
+           generated without dropping a pair below the separation floor, so the tail is pooled
+           into one neutral ribbon rather than given a colour that pretends to be distinct. -->
+      <input type="range" id="topSources" min="3" max="8" value="8" step="1">
     </div>
     <div class="ctl">
       <label for="rule">Reported by</label>
@@ -177,7 +182,7 @@
   <p class="finding" id="finding" hidden></p>
   <div class="chips" id="chips" hidden></div>
   <div class="empty" id="emptyState" hidden></div>
-  <div class="grid" id="grid"></div>
+  <div class="grid" id="grid" tabindex="-1" role="main"></div>
 
   <div class="legend-grid" id="legend"></div>
 
@@ -199,6 +204,7 @@
 
 <script src="/vendor/d3.min.js"></script>
 <script src="/names.js"></script>
+<script src="/palette.js"></script>
 <script src="/filters.js"></script>
 <script src="/colour.js"></script>
 <script src="/timerange.js"></script>

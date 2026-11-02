@@ -21,7 +21,7 @@ const short = (n) => window.shortCountryName(n, 0);
 /** The shipped view. The URL carries only what differs from this, and so do the chips. */
 const DEFAULTS = {
   item: 656, year: 2019, span: 5, rule: 'importer',
-  expZone: 'africa', impZone: 'europe', topSources: 12,
+  expZone: 'africa', impZone: 'europe', topSources: 8,
 };
 
 const state = {
@@ -39,11 +39,16 @@ const fmtV = (v) =>                       // thousands of USD in
   v >= 1e3 ? '$' + (v / 1e3).toFixed(1) + 'm' : '$' + v.toFixed(0) + 'k';
 const yearLabel = () => state.span > 1 ? `${state.year}–${state.year + state.span - 1}` : String(state.year);
 
-/** Warm ordinal ramp: yellow through orange to brown, ordered by volume rank. */
-function slotColour(slot, total) {
-  if (slot < 0) return css('--cat-other');
-  const t = total <= 1 ? 0.55 : 0.34 + (slot / (total - 1)) * 0.60;
-  return d3.interpolateYlOrBr(t);
+/**
+ * One origin's colour, from the validated eight-slot palette in palette.js.
+ *
+ * `slot` is the origin's global volume rank, assigned once across the whole selection, so an
+ * origin keeps its colour in every dial. `total` is no longer used: the old ramp stretched
+ * itself across however many origins were named, which is exactly what made adjacent slots
+ * indistinguishable. The slots are fixed now, and the tail is pooled instead.
+ */
+function slotColour(slot) {
+  return window.originColour(slot, window.themeResolved ? window.themeResolved() : 'light');
 }
 
 // ---------------------------------------------------------------- data
@@ -218,7 +223,7 @@ function drawGrid(d) {
       ink: css('--ink'), dim: css('--ink-2'), trend: css('--ink-3'),
       stroke: css('--surface'), strokeWidth: 0.5,
       totalText: fmtT(imp.qty),
-      fill: (b) => slotColour(b.source.slot, nSlots),
+      fill: (b) => slotColour(b.source.slot),
     });
 
     for (const { node, band } of ribbons) {
@@ -272,7 +277,7 @@ function updateTable(d) {
 function drawLegend(d) {
   const host = d3.select('#legend');
   host.selectAll('*').remove();
-  const rows = d.legend.map((l) => ({ name: short(l.name), colour: slotColour(l.slot, d.legend.length), v: l.total }));
+  const rows = d.legend.map((l) => ({ name: short(l.name), colour: slotColour(l.slot), v: l.total }));
   if (d.otherSellers > 0) {
     const namedTotal = d.legend.reduce((a, b) => a + b.total, 0);
     rows.push({ name: `Other origins (${d.otherSellers})`, colour: css('--cat-other'), v: Math.max(0, d.totals.qty - namedTotal) });
@@ -290,7 +295,7 @@ function drawHowTo(d) {
   const mini = window.funnelDial({ sources: demo, total: 1, R: 34, maxRibbons: 6 });
   g.selectAll('path').data(mini.bands).join('path')
     .attr('d', (b) => b.d)
-    .attr('fill', (b) => slotColour(b.source.slot, 5))
+    .attr('fill', (b) => slotColour(b.source.slot))
     .attr('stroke', css('--surface')).attr('stroke-width', 0.5);
   g.append('line').attr('x1', mini.line.x).attr('x2', mini.line.x)
     .attr('y1', mini.line.yTop).attr('y2', mini.line.yTop + mini.line.height)
@@ -311,8 +316,14 @@ function drawHowTo(d) {
       : 'Dial size is the volume that country brought in.')
     + ' The small line to the left traces that intake across the years shown, with a dot on '
     + 'the most recent one. It is scaled to that country’s own range rather than a shared '
-    + 'one, so it reads as a direction of travel and not as a size. Origins past the largest '
-    + `${d.legend.length} are pooled into one neutral ribbon.`;
+    + 'one, so it reads as a direction of travel and not as a size. '
+    // The colour rule is different on this page from the other two, and a reader who has
+    // just come from them will carry the wrong one over unless it is said out loud.
+    + 'Colour names the origin here, one fixed hue each, which is not what colour means on '
+    + 'Flows or the map: there it places a country on a single scale from origin to market. '
+    + `Eight origins can be told apart reliably, so past the largest ${d.legend.length} the `
+    + 'rest are pooled into one grey ribbon rather than given a ninth colour that would look '
+    + 'like one of the eight.';
 }
 
 // ---------------------------------------------------------------- tooltip

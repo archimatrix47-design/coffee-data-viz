@@ -74,6 +74,8 @@
 </head>
 <body>
 
+<a class="skip-link" href="#main">Skip to the visualisation</a>
+
 <header class="topbar">
   <h1>Global Coffee Trade</h1>
   <span class="sub">Flow map · FAOSTAT 1986–2024</span>
@@ -146,7 +148,7 @@
 
 <div class="shell">
   <div class="chips" id="chips" hidden></div>
-  <div class="map-area">
+  <div class="map-area" id="main" tabindex="-1" role="main">
     <svg id="map" role="img" aria-label="World map of coffee trade routes"></svg>
     <div class="float">
       <button id="zIn" title="Zoom in">+</button>

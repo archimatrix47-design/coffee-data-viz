@@ -52,6 +52,8 @@
 </head>
 <body>
 
+<a class="skip-link" href="#main">Skip to the visualisation</a>
+
 <header class="topbar">
   <h1>Global Coffee Trade</h1>
   <span class="sub">Poster export</span>
@@ -65,7 +67,7 @@
 </header>
 
 <div class="shell">
-  <div class="stagewrap"><div id="preview"></div></div>
+  <div class="stagewrap" id="main" tabindex="-1" role="main"><div id="preview"></div></div>
 
   <aside class="panel">
     <section>
@@ -164,6 +166,7 @@
 <script src="/vendor/d3.min.js"></script>
 <script src="/vendor/map-libs.js"></script>
 <script src="/names.js"></script>
+<script src="/palette.js"></script>
 <script src="/filters.js"></script>
 <script src="/colour.js"></script>
 <script src="/funnel.js"></script>

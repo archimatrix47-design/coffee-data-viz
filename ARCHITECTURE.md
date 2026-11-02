@@ -250,6 +250,7 @@ web/
   theme.js           light / dark / follow-OS toggle, stored, drives the poster
   names.js           country display names        ← shared by all pages
   colour.js          value-driven tint + gradient helper  ← shared
+  palette.js         the eight validated origin hues, per surface  ← shared
   index.html  / chord.js       Flows
   network.html/ map.js         Map
   breakdown.html / breakdown.js  Breakdown
@@ -297,6 +298,19 @@ publishes itself.
 
 ## 7. Traps, things that already bit me once
 
+- **A sequential ramp cannot name things.** The origin colours were one ramp stretched across
+  however many origins were named. That is fine for rank and useless for identity: twelve steps
+  of one hue sat ΔE 3.8 apart against a floor of 15, so the legend was five orange squares. The
+  palette is eight fixed hues now, validated with the dataviz skill's checker against this
+  site's own surfaces, and the count is capped at eight because eight is what passes. A ninth
+  origin pools into grey rather than taking a colour that pretends to be distinct. Run the
+  checker, do not reason about it.
+- **Dark mode is selected, not flipped.** The same ramp on both surfaces lost the opposite end
+  in each: three steps at 1.87-2.82:1 on dark, six under 3:1 on light. Each mode has its own
+  eight steps.
+- **Content must never depend on an animation firing.** Scrolling the grid fast enough outran
+  the reveal observer and left nine cards permanently invisible. There is a sweep that shows
+  anything still hidden; keep it, and do not make new content reveal-only.
 - **A bare class cannot override a base element+attribute rule.** `.tr-h` is (0,1,0) and
   `input[type="range"]` is (0,1,1), so the base 148px width won no matter where the rules
   sat. Both range handles were laid out across 148px of a 397px track: the readout said

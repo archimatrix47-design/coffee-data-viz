@@ -21,6 +21,13 @@
 import fs from 'node:fs';
 import serverless from 'serverless-http';
 
+const NEWLINE = String.fromCharCode(10);
+
+/** Same switch that closes the study harness; see health.mjs for why the detail is gated. */
+const VERBOSE = process.env.ALLOW_DEV_ROUTES
+  ? !/^(0|false|off)$/i.test(process.env.ALLOW_DEV_ROUTES)
+  : process.env.NODE_ENV !== 'production';
+
 let wrapped = null;
 let initError = null;
 let initDone = false;
@@ -84,22 +91,24 @@ export const handler = async (event, context) => {
   await ensureInit();
 
   if (initError) {
-    const cwd = process.cwd();
-    return json(500, {
-      error: initError.message,
-      stack: String(initError.stack || '').split('\n').slice(0, 6),
-      // The usual cause of an init failure here is included_files not landing where the
-      // lookup expects, so report what the container can actually see. One request, and the
-      // real layout is known rather than guessed at.
-      cwd,
+    // The message always goes out: whoever is looking at a broken page deserves to know why,
+    // and the message alone names no internals. The stack and the directory listings are what
+    // diagnosed the original 502; to anyone else they are reconnaissance detail, so they ride
+    // the same switch that closes the study harness and come back by flipping one variable.
+    const body = { error: initError.message };
+    if (VERBOSE) {
+      const cwd = process.cwd();
+      body.stack = String(initError.stack || '').split(NEWLINE).slice(0, 6);
       // Wrapped because import.meta.url does not survive a CommonJS bundle, and a diagnostic
       // that throws inside the error handler turns a useful 500 back into the 502 it exists
       // to replace.
-      moduleDir: safeModuleDir(),
-      taskContents: safeList(cwd),
-      dataContents: safeList(cwd + '/data'),
-      processedContents: safeList(cwd + '/data/processed'),
-    });
+      body.moduleDir = safeModuleDir();
+      body.cwd = cwd;
+      body.taskContents = safeList(cwd);
+      body.dataContents = safeList(cwd + '/data');
+      body.processedContents = safeList(cwd + '/data/processed');
+    }
+    return json(500, body);
   }
 
   // Netlify rewrites /api/x to /.netlify/functions/api/x, so Express would see the function's

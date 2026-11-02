@@ -315,8 +315,22 @@ function render() {
     const r = d3.scaleSqrt().domain([0, maxThru]).range([1.2, 16]);
     const placed = nodes.map((n) => ({ n, p: posOf(n) })).filter((d) => d.p);
 
-    nodesG.selectAll('circle').data(placed).join('circle')
+    // Ordered by volume so the tab order is the reading order, and so the first Tab into the
+    // map lands on Brazil rather than on whichever country happens to be first in the data.
+    const byVolume = [...placed].sort((a, b) => b.n.throughput - a.n.throughput);
+
+    nodesG.selectAll('circle').data(byVolume).join('circle')
       .attr('class', 'cnode')
+      // Selecting a country was mouse-only: 97 circles and 400 routes, none of them reachable
+      // from a keyboard, and the table view lists totals rather than the per-partner
+      // proportion the rings show, so it is not a substitute for this interaction.
+      //
+      // Roving tabindex: one stop for the whole map, arrows to move within it. Ninety-seven
+      // separate tab stops would be its own accessibility problem.
+      .attr('tabindex', (d, i) => (i === 0 ? 0 : -1))
+      .attr('role', 'button')
+      .attr('aria-label', (d) => `${short(d.n.name)}, ${fmt(d.n.exports)} exported, ${fmt(d.n.imports)} imported`)
+      .attr('aria-pressed', (d) => String(state.selected === d.n.idx))
       .attr('cx', (d) => projection(d.p)[0])
       .attr('cy', (d) => projection(d.p)[1])
       .attr('r', (d) => r(d.n.throughput))
@@ -324,6 +338,39 @@ function render() {
       .attr('fill-opacity', 0.85)
       .attr('stroke', css('--surface-1'))
       .attr('stroke-width', 0.8)
+      .on('focus', function (e, d) {
+        const b = this.getBoundingClientRect();
+        showTip({ clientX: b.left + b.width / 2, clientY: b.top }, short(d.n.name), [
+          [fmt(d.n.exports), 'exported'], [fmt(d.n.imports), 'imported'],
+          [d.n.reexport.toFixed(2), 're-export ratio'],
+        ]);
+      })
+      .on('blur', hideTip)
+      .on('keydown', function (e, d) {
+        const nodes = [...nodesG.selectAll('circle.cnode').nodes()];
+        const i = nodes.indexOf(this);
+        const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+        if (step) {
+          e.preventDefault();
+          const next = nodes[(i + step + nodes.length) % nodes.length];
+          this.setAttribute('tabindex', '-1');
+          next.setAttribute('tabindex', '0');
+          next.focus();
+          return;
+        }
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const idx = d.n.idx;
+          state.selected = state.selected === idx ? null : idx;
+          refreshSelection();
+          render();
+          // render() throws the circles away and builds new ones, so focus has to be put back
+          // or activating a country drops the keyboard user at the top of the document. Find
+          // it by its country index, not by position: the list is re-sorted on every render.
+          restoreNodeFocus(idx);
+          loadChain().then(() => { if (state.trace) { render(); restoreNodeFocus(idx); } });
+        }
+      })
       .on('mousemove', (e, d) => showTip(e, short(d.n.name), [
         [fmt(d.n.exports), 'exported'], [fmt(d.n.imports), 'imported'],
         [d.n.reexport.toFixed(2), 're-export ratio'],
@@ -337,12 +384,42 @@ function render() {
       });
 
     if (state.showLabels) {
-      const top = [...placed].sort((a, b) => b.n.throughput - a.n.throughput).slice(0, 26);
-      nodesG.selectAll('text').data(top).join('text')
+      // Placed largest-first, and a label that will not fit is dropped rather than drawn on
+      // top of one already there. Twenty-six were being placed blind and twenty-one of them
+      // overlapped another: Germany alone collided with Belgium, the Netherlands, Switzerland,
+      // the United Kingdom and Poland. Western Europe is a dozen buyers inside a few hundred
+      // kilometres. Fewer labels that can all be read beats twenty-six that cannot.
+      //
+      // Four positions are tried per country, right first because that is where the eye looks
+      // for a label beside a dot.
+      const CH = 5.2, LH = 12;            // approximate advance and line box at 10px
+      const taken = [];
+      const clear = (b) => !taken.some((q) =>
+        b[0] < q[0] + q[2] && q[0] < b[0] + b[2] && b[1] < q[1] + q[3] && q[1] < b[1] + b[3]);
+
+      const placedLabels = [];
+      for (const d of byVolume) {
+        if (placedLabels.length >= 26) break;
+        const xy = projection(d.p); if (!xy) continue;
+        const name = short(d.n.name);
+        const w = name.length * CH, rad = r(d.n.throughput) + 3;
+        const spots = [
+          { x: xy[0] + rad, y: xy[1] + 3, anchor: 'start', box: [xy[0] + rad, xy[1] - 6, w, LH] },
+          { x: xy[0] - rad, y: xy[1] + 3, anchor: 'end', box: [xy[0] - rad - w, xy[1] - 6, w, LH] },
+          { x: xy[0], y: xy[1] - rad - 4, anchor: 'middle', box: [xy[0] - w / 2, xy[1] - rad - 14, w, LH] },
+          { x: xy[0], y: xy[1] + rad + 11, anchor: 'middle', box: [xy[0] - w / 2, xy[1] + rad + 1, w, LH] },
+        ];
+        const spot = spots.find((sp) => clear(sp.box));
+        if (!spot) continue;             // no room: this one goes unlabelled
+        taken.push(spot.box);
+        placedLabels.push({ d, ...spot, name });
+      }
+
+      nodesG.selectAll('text').data(placedLabels).join('text')
         .attr('class', 'cnode-label')
-        .attr('x', (d) => projection(d.p)[0] + r(d.n.throughput) + 3)
-        .attr('y', (d) => projection(d.p)[1] + 3)
-        .text((d) => short(d.n.name));
+        .attr('x', (l) => l.x).attr('y', (l) => l.y)
+        .attr('text-anchor', (l) => l.anchor)
+        .text((l) => l.name);
     }
   }
 
@@ -588,6 +665,24 @@ function drawSelectionDonut(root, node, byIdx, projection) {
   g.append('text').attr('y', rOuter + 12).attr('text-anchor', 'middle')
     .attr('class', 'cnode-label').style('font-size', '10px').style('font-weight', 650)
     .text(short(node.name));
+}
+
+/**
+ * Put keyboard focus back on a country after a re-render.
+ *
+ * Every render replaces the circles, and d3's join gives back different elements, so a
+ * reference taken before is dead and an index into the old list points at the wrong country.
+ * The country's own idx is the only thing that survives.
+ */
+function restoreNodeFocus(idx) {
+  const node = [...document.querySelectorAll('circle.cnode')]
+    .find((c) => d3.select(c).datum()?.n?.idx === idx);
+  if (!node) return;
+  for (const other of document.querySelectorAll('circle.cnode[tabindex="0"]')) {
+    other.setAttribute('tabindex', '-1');
+  }
+  node.setAttribute('tabindex', '0');
+  node.focus({ preventScroll: true });
 }
 
 /** Emphasis for selection/search, without re-rendering. */

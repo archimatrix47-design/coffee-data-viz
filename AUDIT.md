@@ -9,6 +9,10 @@ Every number here was measured. Where a claim could not be verified, it says so.
 
 ---
 
+> **Status: all seven addressed, 1 November 2026.** Six were fixed; the seventh was
+> re-examined during the work and the recommendation withdrawn, for the reason given under it.
+> One further bug was found while verifying the fixes and is recorded as finding 8.
+
 ## Summary
 
 Seven findings. Two are encoding faults that defeat the thing the site exists to do, two are
@@ -23,7 +27,10 @@ revisiting rather than defects.
 | 4 | Charts are mouse-only: 0 of 497 marks reachable | Medium | Medium |
 | 5 | 21 of 26 map labels overlap another | Medium | Small |
 | 6 | Debug endpoints are publicly readable | Medium | Small |
-| 7 | Equal-size dials flatten a 12,000-fold range | Judgement | Small |
+| 7 | Equal-size dials flatten a 12,000-fold range | Judgement | — |
+| 8 | Cards could stay invisible if the reveal observer was outrun | High | Small |
+
+All marked **fixed** below except 7, which is **withdrawn**.
 
 ---
 
@@ -50,7 +57,13 @@ jobs: show rank (bigger origins darker) and identify a country. It does the firs
 lightness runs 85 → 31 L\*, strictly monotonic, a textbook sequential ramp. It cannot do the
 second, because twelve steps of one ramp are 5 L\* apart and identity needs separation in hue.
 
-**What would fix it.** Pick one job per channel. Either keep the ramp for rank and carry
+**FIXED.** Eight validated hues in `web/palette.js`, one per named origin, slot order fixed so
+colour follows the entity and a filter cannot repaint the survivors. The named-origin control is
+capped at 8 (was 12, max 24) because eight is what passes; the tail pools into one grey ribbon
+rather than taking a ninth colour that would look like one of the eight. Measured after: CVD
+ΔE 9.1 light / 8.4 dark, normal-vision ΔE 19.6 / 19.3.
+
+**What would have fixed it.** Pick one job per channel. Either keep the ramp for rank and carry
 identity some other way — direct labels on the larger ribbons, which the dials have room for —
 or drop to a validated categorical set of 8 with everything beyond folded into "Other", which
 is what the legend's `Other origins (33)` slot already does for the tail. The second is the
@@ -68,9 +81,11 @@ Those are the three largest origins by rank, the ones the eye should find first,
 the 3:1 floor for a graphical object. In light mode the *pale* end fails instead — six slots
 under 3:1. Each mode loses the opposite end of the ramp.
 
-**What would fix it.** Dark mode needs its own steps from the same hue family, chosen against
-the dark surface, rather than the light-mode values reused. It is the same work as finding 1
-and should be done in the same pass.
+**FIXED.** Two sets of eight, each stepped for its own surface, selected rather than flipped.
+Dark now passes contrast on all eight slots; light has three slots in the 2.17–2.82 band, which
+is a documented conditional relax requiring visible labels or a table view — every chart here
+has a table view. The pages read the resolved theme and repaint on `themechange`; the poster
+picks the set matching its own print theme.
 
 ## 3. Three views, two incompatible colour languages
 
@@ -86,9 +101,12 @@ Map and Flows agree: blue means *grows and ships*, red means *buys*. Breakdown u
 unrelated yellow-to-brown ramp where position means volume rank. A reader moving between tabs
 has to notice the rule changed and relearn it, and nothing on the page says it did.
 
-**What would fix it.** Either bring Breakdown onto the origin↔market ramp, or state the change
-in that view's "How to read this" — it currently explains the geometry but not that the colour
-rule is different here. The second is honest and nearly free; the first is better.
+**FIXED, by disclosure rather than unification.** Forcing one ramp across all three would be
+wrong: Flows and the map encode a country's *role* on one origin-to-market scale, because there
+the question is which side of the trade it sits on; the breakdown encodes *which origin*, because
+every ribbon on that page is already an origin and role would say nothing. Two questions need two
+encodings. What they must not do is change silently, so the breakdown's "How to read this" now
+states the rule and says plainly that it differs from the other two views.
 
 ## 4. Charts are mouse-only
 
@@ -102,9 +120,17 @@ the rings show, so a keyboard user cannot reach the view's main insight.
 
 There is also no skip link, and 44 focusable controls sit before the content on every page.
 
-**What would fix it.** Make the country nodes a roving-tabindex list ordered by volume, with
-Enter to select — that reuses the existing click handler and is maybe thirty lines. The skip
-link is four.
+**FIXED.** The 97 country nodes are a roving-tabindex list ordered by volume, so one Tab reaches
+the map and it lands on Brazil rather than whichever country is first in the data; arrows move
+within it, Enter selects, each node carries `role="button"`, an `aria-label` with its figures, and
+`aria-pressed`. Focus is drawn with a ring, since an SVG mark cannot take the usual outline
+reliably. A skip link is on all four pages.
+
+Verified by driving it: Brazil → arrow → United States → Enter selects (22 rings drawn, panel
+updated), and focus stays on the country through both select and deselect. That last part needed a
+second pass — `render()` throws the circles away and builds new ones, so the first version dropped
+focus to the top of the document and the node has to be found again by its country index, not by
+position in a list that gets re-sorted.
 
 ## 5. Map labels collide
 
@@ -115,9 +141,10 @@ inside a few hundred kilometres and the labels are placed without any check.
 The percentage labels on the selection rings already de-collide against each other *and* against
 these country labels. That routine exists and works; the country labels simply do not use it.
 
-**What would fix it.** Run the country labels through the same greedy placement, strongest-first
-by volume, skipping any that cannot be placed. Fewer labels that are all readable beats 26 that
-are not.
+**FIXED.** Placed largest-first, four candidate positions each (right, left, above, below), and
+any label that will not fit is dropped rather than drawn over one already there. **Overlapping
+pairs: 21 → 1.** The one left is Japan/South Korea, a borderline case of the approximate
+character-width estimate rather than a placement failure.
 
 ## 6. Debug endpoints are publicly readable
 
@@ -132,9 +159,11 @@ Nothing secret is in there — server paths, whether some flags are set, top-lev
 is reconnaissance detail rather than credentials. But it is more than a public endpoint should
 volunteer.
 
-**What would fix it.** Keep `/health` as `{ok, node}` for uptime monitoring and gate the verbose
-half behind `ALLOW_DEV_ROUTES`, which already exists and already defaults off in production. Real
-error *messages* can stay; the internals should not.
+**FIXED.** `/health` returns `{ok, node}` in production and the full listing only when
+`ALLOW_DEV_ROUTES` is on — the same switch that closes the study harness, so the diagnostic comes
+back by flipping one variable. The 500 handler still always returns the error *message*, because
+whoever is looking at a broken page deserves to know why and the message names no internals; the
+stack and the directory listings are now gated with it.
 
 ## 7. Equal-size dials flatten a 12,000-fold range
 
@@ -146,10 +175,24 @@ the view's stated purpose.
 Still: the strongest signal on the page is size, and it currently carries nothing. A reader
 skimming the grid takes away that these 36 countries are peers. They are not.
 
-**Worth revisiting**, not a defect. Options are to default "size by volume" on, or to order the
-grid by volume so position carries what size does not. It is already ordered by volume, which
-softens this considerably — so the honest version of this finding is that the default is
-defensible and I would still change it.
+**WITHDRAWN — I was wrong.** I wrote that I would still turn size-by-volume on. Measuring it
+before making the change showed why the current default is right: with it on, **16 of 36 buyers
+fall below R=20** and the median is R=20.6 against Germany's 40. At R=16 a dial is a 32-pixel disc
+carrying eight ribbons, and the funnel shape — the whole reason the view exists — stops being
+readable for nearly half the grid. Trading the view's actual job for a size cue that order and the
+printed tonnage already supply is a bad deal.
+
+Left as it is, deliberately. The checkbox is there for anyone who wants the other reading.
+
+## 8. Cards could stay invisible if the reveal observer was outrun
+
+Found while verifying the palette fix, not in the original pass. Scrolling the 36-card grid end to
+end in one gesture left **nine cards permanently at opacity 0** — never reported as intersecting,
+and the page had already moved past them, so they were never going to appear.
+
+Content must not depend on an animation firing. A sweep now shows anything still hidden outright,
+repeating while there is anything left and again on `pageshow`. Re-tested with the same fast
+scroll: 36 of 36 revealed, 0 invisible.
 
 ---
 
@@ -170,7 +213,7 @@ Worth recording, so a future pass does not "fix" it:
 
 ## Not verified
 
-**The live site itself.** No URL was available, so this was run against `dist/` plus the real
+**The live site itself.** Still no URL, so this was run against `dist/` plus the real
 function handler — which is the same code and the same artifact, but not the same CDN, cold
 starts, or network. Three things can only be checked against the deployed origin:
 

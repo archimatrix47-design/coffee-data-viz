@@ -80,7 +80,7 @@ const ENDPOINT = {
   breakdown: () => '/api/breakdown?' + new URLSearchParams({
     items: S.item, yearFrom: S.year, yearTo: S.year + S.span - 1,
     rule: S.rule, expZone: S.expZone, impZone: S.impZone,
-    topSources: Math.min(S.topN, 16), maxImporters: 30 }),
+    topSources: Math.min(S.topN, window.ORIGIN_SLOTS), maxImporters: 30 }),
 };
 
 async function load() {
@@ -481,12 +481,10 @@ function drawBreakdown(P) {
   const { svg, t, box } = P;
   const d = S.data;
   const importers = d.importers.slice(0, 30);
-  const nSlots = d.legend.length;
-  const slotColour = (slot) => {
-    if (slot < 0) return t.neutral;
-    const k = nSlots <= 1 ? 0.55 : slot / (nSlots - 1);
-    return d3.interpolateYlOrBr(0.34 + k * 0.60);
-  };
+  // Same eight validated hues as the page, picked for whichever surface this poster prints on.
+  // A poster has no table view to fall back on, so the palette has to carry identity by itself.
+  const paletteMode = ['espresso', 'ink', 'slate'].includes(themeKey()) ? 'dark' : 'light';
+  const slotColour = (slot) => window.originColour(slot, paletteMode);
 
   // --- the two headline totals, as on the page ---
   //

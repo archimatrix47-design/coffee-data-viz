@@ -12,18 +12,35 @@
  * at it.
  */
 
+/**
+ * The verbose half is gated. Paths, environment values and directory listings are what made
+ * this useful while the 502 was unexplained, and they are more than a public endpoint should
+ * volunteer once it is not. Nothing secret is in them, but they are reconnaissance detail.
+ * ALLOW_DEV_ROUTES already exists, already defaults off in production, and is the same switch
+ * that closes the study harness, so the diagnostic comes back by flipping one variable.
+ */
+const VERBOSE = process.env.ALLOW_DEV_ROUTES
+  ? !/^(0|false|off)$/i.test(process.env.ALLOW_DEV_ROUTES)
+  : process.env.NODE_ENV !== 'production';
+
 export const handler = async () => {
-  const out = {
-    ok: true,
-    node: process.version,
-    cwd: process.cwd(),
-    moduleDir: (() => { try { return new URL('.', import.meta.url).pathname; } catch { return typeof __dirname === 'string' ? __dirname : 'unknown'; } })(),
-    env: {
-      NODE_ENV: process.env.NODE_ENV ?? null,
-      ALLOW_DEV_ROUTES: process.env.ALLOW_DEV_ROUTES ?? null,
-      DATA_DIR: process.env.DATA_DIR ?? null,
-      LAMBDA_TASK_ROOT: process.env.LAMBDA_TASK_ROOT ?? null,
-    },
+  // Enough to answer "is the function alive", which is the whole job of a canary.
+  const out = { ok: true, node: process.version };
+  if (!VERBOSE) {
+    return {
+      statusCode: 200,
+      headers: { 'content-type': 'application/json', 'cache-control': 'no-store' },
+      body: JSON.stringify(out),
+    };
+  }
+
+  out.cwd = process.cwd();
+  out.moduleDir = (() => { try { return new URL('.', import.meta.url).pathname; } catch { return typeof __dirname === 'string' ? __dirname : 'unknown'; } })();
+  out.env = {
+    NODE_ENV: process.env.NODE_ENV ?? null,
+    ALLOW_DEV_ROUTES: process.env.ALLOW_DEV_ROUTES ?? null,
+    DATA_DIR: process.env.DATA_DIR ?? null,
+    LAMBDA_TASK_ROOT: process.env.LAMBDA_TASK_ROOT ?? null,
   };
 
   // Imported here rather than at the top so that even a broken module resolution still lets

@@ -597,6 +597,29 @@ input[type="range"].tr-h:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0
   font-size: 9.5px; color: var(--ink-2); font-variant-numeric: tabular-nums;
 }
 
+/* An SVG mark cannot take the usual outline reliably across browsers, so the focused node
+   gets a drawn ring instead. Without this the keyboard user can move around the map and has
+   no idea where they are. */
+.cnode:focus { outline: none; }
+.cnode:focus-visible {
+  outline: none;
+  stroke: var(--accent);
+  stroke-width: 2.5px;
+  paint-order: stroke;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--accent) 70%, transparent));
+}
+
+/* Forty-four controls sit before the content on every page. */
+.skip-link {
+  position: absolute; left: var(--s-5); top: var(--s-5); z-index: 100;
+  transform: translateY(-200%);
+  padding: var(--s-4) var(--s-6); border-radius: var(--r-sm);
+  background: var(--accent); color: var(--on-accent);
+  font-size: var(--t-small); font-weight: 600; text-decoration: none;
+  transition: transform var(--dur-ui) var(--ease-standard);
+}
+.skip-link:focus-visible { transform: translateY(0); }
+
 /* ── Active filters ──
    The whole chip is the button, not a label with a small × inside it. One target instead of
    two, and it clears comfortably above the 24px minimum without the pill having to look big. */
